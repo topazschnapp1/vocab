@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>מילון - גילוי עברית</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #111;
+    color: #f0f0f0;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    padding-bottom: 100px;
+  }
+
+  .sticky-bar {
+    position: sticky;
+    top: 0;
+    background: #111;
+    z-index: 99;
+    padding: 10px 14px;
+    border-bottom: 1px solid #2a2a2a;
+  }
+  .bar-row1 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+  }
+  .title { flex: 1; font-size: 0.8rem; color: #777; min-width: 80px; }
+
+  .btn {
+    padding: 9px 18px;
+    border-radius: 24px;
+    border: none;
+    font-size: 0.92rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .btn:active { opacity: 0.7; }
+  #btnPlay { background: #f0c040; color: #111; }
+  #btnStop { background: #ff4444; color: #fff; display: none; }
+  #btnRestart { background: #333; color: #aaa; border: 1px solid #444; font-size: 0.8rem; padding: 7px 12px; display: none; }
+
+  .toggle-btn {
+    background: #1a3a1a; color: #6fda6f;
+    border: 1px solid #3a6a3a;
+    padding: 7px 12px; border-radius: 20px;
+    font-size: 0.78rem; cursor: pointer;
+  }
+  .toggle-btn.off { background: #222; color: #666; border-color: #333; }
+
+  .bar-row2 { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .voice-group { display: flex; align-items: center; gap: 5px; flex: 1; min-width: 180px; }
+  .voice-label { font-size: 0.72rem; color: #666; white-space: nowrap; }
+  select {
+    flex: 1; background: #1e1e1e; color: #ddd;
+    border: 1px solid #333; border-radius: 8px;
+    padding: 5px 8px; font-size: 0.75rem; outline: none;
+  }
+
+  .progress {
+    position: fixed; top: 0; left: 0;
+    height: 3px; background: #f0c040;
+    width: 0; transition: width 0.3s; z-index: 999;
+  }
+
+  .words { padding: 6px 0; }
+
+  .row {
+    padding: 13px 16px;
+    border-bottom: 1px solid #1e1e1e;
+    scroll-margin-top: 90px;
+    transition: background 0.2s;
+    cursor: pointer;
+  }
+  .row:active { background: #1a1a1a; }
+  .row.active { background: #1c1800; }
+  .row.removed { opacity: 0.3; text-decoration: line-through; background: #1a0000; }
+
+  .row-top { display: flex; align-items: center; gap: 10px; }
+  .num { font-size: 0.7rem; color: #444; min-width: 26px; }
+  .en { font-size: 1.05rem; font-weight: 700; flex: 1; color: #fff; }
+  .row.active .en { color: #f0c040; }
+
+  .speaker { font-size: 1rem; opacity: 0; flex-shrink: 0; }
+  .row.active .speaker { opacity: 1; animation: pulse 0.7s ease-in-out infinite alternate; }
+  @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.3); } }
+
+  .sentence {
+    margin-top: 7px; padding-right: 36px;
+    font-size: 0.82rem; color: #555;
+    font-style: italic; line-height: 1.4;
+  }
+  .row.active .sentence { color: #999; }
+
+  .he-wrap {
+    margin-top: 7px;
+    padding: 8px 8px 8px 36px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 8px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: rgba(255,255,255,0.1);
+  }
+  .he-text {
+    font-size: 0.88rem;
+    color: #888;
+    direction: rtl;
+    filter: blur(6px);
+    transition: filter 0.3s;
+    user-select: none;
+    pointer-events: none;
+    flex: 1;
+  }
+  .he-wrap.revealed .he-text { filter: none; }
+  .reveal-hint {
+    font-size: 0.7rem;
+    color: #555;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+  .he-wrap.revealed .reveal-hint { display: none; }
+
+  .remove-btn {
+    background: rgba(255,60,60,0.15);
+    border: 1px solid rgba(255,60,60,0.3);
+    color: #ff6060; border-radius: 6px;
+    padding: 4px 10px; font-size: 0.8rem;
+    cursor: pointer; flex-shrink: 0; display: none;
+  }
+  .edit-mode .remove-btn { display: inline-block; }
+  .row.removed .remove-btn { background: rgba(60,200,60,0.15); border-color: rgba(60,200,60,0.3); color: #60cc60; }
+
+  .loading-dot {
+    display: inline-block;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #f0c040;
+    animation: blink 0.8s infinite;
+    margin-right: 4px;
+  }
+  @keyframes blink { 0%,100% { opacity: 0.2; } 50% { opacity: 1; } }
+</style>
+</head>
+<body>
+
+<div class="progress" id="progress"></div>
+
+<div class="sticky-bar">
+  <div class="bar-row1">
+    <span class="title" id="statusText">לחץ על מילה או הקרא הכל</span>
+    <button class="toggle-btn" id="toggleBtn" onclick="toggleSentences()">📝 משפטים</button>
+    <button class="toggle-btn" id="editBtn" onclick="toggleEditMode()">🗑 הסר</button>
+    <button class="btn" id="btnRestart" onclick="restartReading()">↩ התחלה</button>
+    <button class="btn" id="btnPlay" onclick="continueReading()">▶ הקרא הכל</button>
+    <button class="btn" id="btnStop" onclick="stopReading()">■ עצור</button>
+  </div>
+  <div class="bar-row2">
+    <div class="voice-group">
+      <span class="voice-label">🎙 קול:</span>
+      <select id="voiceSelect">
+        <option value="Rachel">Rachel — נשי, אמריקאי</option>
+        <option value="Drew">Drew — גברי, אמריקאי</option>
+        <option value="Clyde">Clyde — גברי, אמריקאי</option>
+        <option value="Paul">Paul — גברי, אמריקאי</option>
+        <option value="Domi">Domi — נשי, אמריקאי</option>
+        <option value="Dave">Dave — גברי, בריטי</option>
+        <option value="Fin">Fin — גברי, אירי</option>
+        <option value="Bella">Bella — נשי, אמריקאי</option>
+        <option value="Antoni">Antoni — גברי, אמריקאי</option>
+        <option value="Thomas">Thomas — גברי, אמריקאי</option>
+        <option value="Charlie">Charlie — גברי, אוסטרלי</option>
+        <option value="Emily">Emily — נשי, אמריקאי</option>
+        <option value="Elli">Elli — נשי, אמריקאי</option>
+        <option value="Callum">Callum — גברי, אמריקאי</option>
+        <option value="Patrick">Patrick — גברי, אמריקאי</option>
+        <option value="Harry">Harry — גברי, אמריקאי</option>
+        <option value="Liam">Liam — גברי, אמריקאי</option>
+        <option value="Dorothy">Dorothy — נשי, בריטי</option>
+        <option value="Josh">Josh — גברי, אמריקאי</option>
+        <option value="Arnold">Arnold — גברי, אמריקאי</option>
+        <option value="Charlotte">Charlotte — נשי, שוודי</option>
+        <option value="Matilda">Matilda — נשי, אוסטרלי</option>
+        <option value="Matthew">Matthew — גברי, אמריקאי</option>
+        <option value="James">James — גברי, אוסטרלי</option>
+        <option value="Joseph">Joseph — גברי, בריטי</option>
+        <option value="Jeremy">Jeremy — גברי, אמריקאי</option>
+        <option value="Michael">Michael — גברי, אמריקאי</option>
+        <option value="Ethan">Ethan — גברי, אמריקאי</option>
+        <option value="Chris">Chris — גברי, אמריקאי</option>
+        <option value="Gigi">Gigi — נשי, אמריקאי</option>
+        <option value="Freya">Freya — נשי, אמריקאי</option>
+        <option value="Grace">Grace — נשי, אמריקאי</option>
+        <option value="Daniel">Daniel — גברי, בריטי</option>
+        <option value="Lily">Lily — נשי, בריטי</option>
+        <option value="Serena">Serena — נשי, אמריקאי</option>
+        <option value="Adam">Adam — גברי, אמריקאי</option>
+        <option value="Nicole">Nicole — נשי, אמריקאי</option>
+        <option value="Bill">Bill — גברי, אמריקאי</option>
+        <option value="Jessie">Jessie — גברי, אמריקאי</option>
+        <option value="Sam">Sam — גברי, אמריקאי</option>
+        <option value="Glinda">Glinda — נשי, אמריקאי</option>
+        <option value="Giovanni">Giovanni — גברי, איטלקי-אנגלי</option>
+        <option value="Mimi">Mimi — נשי, שוודי-אנגלי</option>
+      </select>
+    </div>
+    <div class="voice-group">
+      <span class="voice-label">⚡ מהירות:</span>
+      <select id="speedSelect">
+        <option value="0.7">איטי</option>
+        <option value="0.85">איטי-בינוני</option>
+        <option value="1.0" selected>רגיל</option>
+        <option value="1.15">מהיר</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<div class="words" id="wordList"></div>
+
+<script>
+const API_KEY = 'sk_384f8d540a4d8a069ccc638cff64b7349117cad3beb2d0e0';
+
+const words = [
+  ["Reserve","שמורת טבע","Hikers explored the reserve and spotted rare birds."],
+  ["Diverse","מגוון","The team brought diverse skills to solve the problem."],
+  ["Acres","אקרים","They planted trees across fifty acres of bare land."],
+  ["Designated","מיועד","A designated driver ensures everyone gets home safely."],
+  ["Glaciers","קרחונים","The glaciers in the Alps have shrunk dramatically."],
+  ["Obtained by","הושג על ידי","The evidence was obtained by careful investigation."],
+  ["Ranchers","רועי בקר","The ranchers built new fences to protect their herds."],
+  ["Overgrazed","רעוי יתר","The field was overgrazed until nothing was left to eat."],
+  ["Pasture","מרעה","Sheep wandered lazily across the green pasture."],
+  ["Recuperating","מחלים","He spent two weeks recuperating by the sea."],
+  ["Restored","שוקם","The ancient mosaic was carefully restored by experts."],
+  ["Flora","צומח / פלורה","The island's flora includes plants found nowhere else."],
+  ["Ranges","שטחי מרעה","Wild horses roam freely through the mountain ranges."],
+  ["Grasslands","ערבות","Lions hunt across the open grasslands of Africa."],
+  ["Recorded","מתועד","The concert was recorded and later released online."],
+  ["Native","ילידי","The native population has lived here for thousands of years."],
+  ["Invasive","פולשני","Invasive fish are threatening the lake's ecosystem."],
+  ["Gigantic","ענקי","A gigantic statue stood at the entrance of the city."],
+  ["Algae","אצות","Algae bloomed after the warm summer temperatures."],
+  ["Topped with","מכוסה ב","The pizza was topped with mushrooms and olives."],
+  ["Flaky","פריך","The croissant was perfectly flaky on the outside."],
+  ["Valley","עמק","The village was hidden deep in a forested valley."],
+  ["Composition","הרכב","The teacher praised the student's essay composition."],
+  ["Presence","נוכחות","His calm presence helped everyone feel less nervous."],
+  ["Dreary","עגום","The gray, dreary afternoon made her want to stay inside."],
+  ["Reflective","הוגה","He sat in a reflective silence by the window."],
+  ["Attempt","ניסיון","The climber made a second attempt to reach the summit."],
+  ["Tremendous","עצום","The band received a tremendous response from the crowd."],
+  ["Elementary","יסודי","The mistake was elementary and easy to fix."],
+  ["Attended","השתתף","He attended the ceremony despite feeling unwell."],
+  ["Throne","כס המלכות","The prince was next in line to inherit the throne."],
+  ["Passing of","העברת / פטירתו של","The passing of the bill was celebrated by activists."],
+  ["Treaty","אמנה","The treaty ended decades of conflict between the nations."],
+  ["Prosperity","שגשוג","The new trade route brought prosperity to the region."],
+  ["Surge","עלייה חדה","There was a surge in ticket sales after the announcement."],
+  ["Comprehensive","מקיף","They conducted a comprehensive review of all expenses."],
+  ["Conference","כנס","She presented her research at an international conference."],
+  ["Exposure","חשיפה","Early exposure to music can boost a child's development."],
+  ["Ritual","טקס","Lighting candles on Friday night is a family ritual."],
+  ["Prevention","מניעה","Good nutrition plays a role in disease prevention."],
+  ["Endure","לסבול","Athletes must endure intense training to compete."],
+  ["Accustomed","רגיל","She became accustomed to the noise of the city."],
+  ["Invoking","מעורר","The poem succeeded in invoking a sense of nostalgia."],
+  ["Anxiety","חרדה","Moving to a new school filled him with anxiety."],
+  ["Subsided","שכך","The storm subsided by morning leaving calm skies."],
+  ["Reuptake","ספיגה חוזרת","Some medications work by blocking the reuptake of dopamine."],
+  ["Inhibitors","מעכבים","Enzyme inhibitors are used in many medical treatments."],
+  ["Neurotransmitters","מוליכים עצביים","Mood disorders are often linked to imbalanced neurotransmitters."],
+  ["Pills","כדורים","The doctor told her to take the pills after meals."],
+  ["Bind","נקשר","Certain proteins bind together to form complex structures."],
+  ["Receptor","קולטן","The drug targets a specific receptor in the nervous system."],
+  ["Excessive","מופרז","Excessive screen time can disrupt sleep patterns."],
+  ["Aided","סייע","The volunteers aided in the cleanup after the flood."],
+  ["Inconclusive","לא חד משמעי","The investigation was inconclusive and needed more evidence."],
+  ["Pollinated","מואבק","The apple trees were pollinated thanks to nearby beehives."],
+  ["Pollen","אבקה","A cloud of yellow pollen drifted across the garden."],
+  ["Nectar","צוף","Hummingbirds feed on the nectar of tropical flowers."],
+  ["Honeycomb","חלת דבש","The beekeeper gently removed the honeycomb from the hive."],
+  ["Wax","שעווה","She sealed the envelope with red wax."],
+  ["Harvest","קציר","The village celebrated the harvest with music and food."],
+  ["Straw","קש","The children built a small hut using straw."],
+  ["Clay","חימר","The sculptor shaped the clay into a human face."],
+  ["Stings","עקיצות","He counted three stings on his arm after the wasp attack."],
+  ["Durable","עמיד","The durable material resisted rain and heat for years."],
+  ["Neat","מסודר","She kept her handwriting neat and easy to read."],
+  ["Fingerprint","טביעת אצבע","His fingerprint unlocked the phone instantly."],
+  ["Fossil","מאובן","A fossil of an ancient sea creature was found in the desert."],
+  ["Modest","צנוע","Despite winning the award she remained modest."],
+  ["Cave","מערה","They found ancient drawings deep inside the cave."],
+  ["Eloquent","רהוט","The lawyer gave an eloquent closing argument."],
+  ["Rudimentary","ראשוני","The shelter was rudimentary but kept them dry."],
+  ["Furious","זועם","She was furious when she found out her work was copied."],
+  ["Correspond","להתכתב","The pen pals began to correspond after meeting online."],
+  ["Dwell","להתעכב","It is not healthy to dwell on past mistakes."],
+  ["Blink","למצמץ","He did not blink during the entire staring contest."],
+  ["Exposed","חשוף","The workers were exposed to dangerous chemicals."],
+  ["Pleaded","התחנן","She pleaded with her parents to let her go on the trip."],
+  ["Adorned","מקושט","The dress was adorned with delicate silver embroidery."],
+  ["Crumbled","התפורר","The old bridge crumbled under the weight of the truck."],
+  ["Insanity","אי שפיות","The defense argued that the act was committed in a moment of insanity."],
+  ["Insist","להתעקש","He continued to insist that he had seen nothing."],
+  ["Trim","לגזום","She asked the hairdresser to just trim the ends."],
+  ["Explosion","פיצוץ","The explosion shook windows for miles around."],
+  ["Lingered","נשאר / רחף","The memory of that day lingered with her for years."],
+  ["Tranquilization","הרדמה","Tranquilization was necessary before moving the injured bear."],
+  ["Correspondence","התכתבות","Their correspondence revealed a deep mutual respect."],
+  ["Branched","התפצל","The hiking trail branched off near the river."],
+  ["Pursuit","מרדף","The journalist dedicated her career to the pursuit of truth."],
+  ["Wagered","הימר","He wagered his reputation on the outcome of the deal."],
+  ["Debt","חוב","It took him five years to clear his debt."],
+  ["Mine","מכרה","Gold was discovered in the mine last spring."],
+  ["Assess","להעריך","The engineers arrived to assess the damage to the bridge."],
+  ["Halve","לחלק לשניים","If you halve the dough you can make two smaller loaves."],
+  ["Silky","משיי","The cat's fur felt silky and warm."],
+  ["Morose","קודר","After the defeat the coach sat alone and morose."],
+  ["Nocturnal","לילי","Bats are nocturnal and navigate in complete darkness."],
+  ["Scarves","צעיפים","She knitted three scarves as gifts for her friends."],
+  ["Chanting","מזמר","The monks were chanting quietly in the temple."],
+  ["Deliberately","במכוון","He deliberately arrived late to avoid the opening speech."],
+  ["Excessively","באופן מופרז","She excessively apologized for a very minor mistake."],
+  ["Frustration","תסכול","His frustration was clear when the computer crashed again."],
+  ["Sacrifice","הקרבה","The team made a great sacrifice to complete the project on time."],
+  ["Spike","עלייה חדה","There was a sudden spike in traffic after the post went viral."],
+  ["Drift","לסחוף","The leaves began to drift down from the tall oak tree."],
+  ["Inquired","שאל","The tourist inquired about the best route to the museum."],
+  ["Confessed","הודה","She confessed that she had forgotten to send the email."],
+  ["Breeding","גידול","The program focuses on the breeding of endangered turtles."],
+  ["Livestock","מקנה","The drought severely affected the region's livestock."],
+  ["Caste","קסטה","Members of the lower caste faced significant discrimination."],
+  ["Agricultural","חקלאי","The country's economy is largely agricultural."],
+  ["Transparent","שקוף","The process must be transparent to maintain public trust."],
+  ["Disseminate","להפיץ","The health ministry worked to disseminate safety guidelines."],
+  ["Scrutinize","לבחון בדקדקנות","Journalists scrutinize every word of the politician's speech."],
+  ["Accelerate","להאיץ","They plan to accelerate the construction timeline."],
+  ["Reclusively","באופן מסתגר","After retiring he lived reclusively on a small farm."],
+  ["Applauded","מחא כפיים","The crowd applauded as the athletes entered the stadium."],
+  ["Projector","מקרן","The projector broke down halfway through the presentation."],
+  ["Convicts","אסירים","The convicts were given a chance to appeal their sentences."],
+  ["Joyous","עליז","The birth of the baby was a joyous occasion for the family."],
+  ["Superfluous","מיותר","The editor cut all superfluous words from the article."],
+  ["Pitcher","קנקן","He filled the pitcher with cold lemonade."],
+  ["Vast","עצום","A vast ocean separated the two continents."],
+  ["Substance abuse","שימוש לרעה בסמים","The clinic offers support for those struggling with substance abuse."],
+  ["Convened","התכנס","The board convened an emergency meeting late at night."],
+  ["Boycotted","הוטל חרם","The athletes boycotted the event to protest the conditions."],
+  ["Edible","אכיל","She learned which plants in the forest were edible."],
+  ["Jagged","משונן","The jagged rocks made the path difficult to walk."],
+  ["Renovated","שופץ","The school was renovated during the summer break."],
+  ["Deposited","הופקד","Layers of sediment were deposited over millions of years."],
+  ["Ushered","ליווה","A volunteer ushered the elderly visitors to their seats."],
+  ["Taint","לזהם","A single scandal can taint a politician's entire career."],
+  ["Weave","לארוג","She learned to weave baskets from the local artisans."],
+  ["Limber","גמיש","Daily stretching kept her body limber and pain free."],
+  ["Exquisite","מעודן","The dessert had an exquisite combination of flavors."],
+  ["Appeal","ערעור","The convicted man filed an appeal two weeks later."],
+  ["Kidney stones","אבני כליה","Drinking enough water can help prevent kidney stones."],
+  ["Advent of anesthesia","ראשית ההרדמה","Before the advent of anesthesia operations were extremely painful."],
+  ["Disregard","להתעלם","She chose to disregard the criticism and move forward."],
+  ["High wire stunts","תרגילי חבל גבוה","The circus performer rehearsed high wire stunts for months."],
+  ["Nets","רשתות","Fishing nets were spread across the surface of the water."],
+  ["Harnesses","רתמות","The workers wore harnesses while working on the tall scaffolding."],
+  ["Condensation","עיבוי","Condensation dripped down the bathroom mirror after the shower."],
+  ["Convinced","שוכנע","After reading the report she was fully convinced."],
+  ["Plots","מזימות","The detective uncovered a series of plots against the company."],
+  ["Impaired","לקוי","His concentration was impaired by the loud noise outside."],
+  ["Nominated","הומלץ","She was nominated for the position by her colleagues."],
+  ["Reciprocated","גמל","He supported her during difficult times and she reciprocated later."]
+];
+
+let showSentences = true;
+let removedWords = new Set(JSON.parse(localStorage.getItem('removedWords2') || '[]'));
+let editMode = false;
+let currentAudio = null;
+
+const list = document.getElementById('wordList');
+words.forEach((w, i) => {
+  const row = document.createElement('div');
+  row.className = 'row';
+  row.id = 'row-' + i;
+  row.innerHTML = `
+    <div class="row-top">
+      <span class="num">${i+1}</span>
+      <span class="en">${w[0]}</span>
+      <button class="remove-btn" onclick="toggleRemove(event,${i})">הסר</button>
+      <span class="speaker">🔊</span>
+    </div>
+    <div class="sentence">${w[2]}</div>
+    <div class="he-wrap" onclick="revealHe(event,${i})">
+      <span class="he-text">${w[1]}</span>
+      <span class="reveal-hint">👁 הקש לגילוי</span>
+    </div>
+  `;
+  row.onclick = (e) => {
+    if (e.target.closest('.he-wrap') || e.target.classList.contains('remove-btn')) return;
+    if (!isReading) { currentIndex = i; startReading(i); }
+  };
+  list.appendChild(row);
+  if (removedWords.has(i)) {
+    row.classList.add('removed');
+    row.querySelector('.remove-btn').textContent = 'שחזר';
+  }
+});
+
+function revealHe(e, i) {
+  e.stopPropagation();
+  e.currentTarget.classList.toggle('revealed');
+}
+
+function toggleEditMode() {
+  editMode = !editMode;
+  const btn = document.getElementById('editBtn');
+  btn.className = 'toggle-btn' + (editMode ? ' on' : '');
+  btn.textContent = editMode ? '✓ סיום' : '🗑 הסר';
+  document.getElementById('wordList').classList.toggle('edit-mode', editMode);
+}
+
+function toggleRemove(e, i) {
+  e.stopPropagation();
+  const row = document.getElementById('row-' + i);
+  const btn = row.querySelector('.remove-btn');
+  if (removedWords.has(i)) {
+    removedWords.delete(i);
+    row.classList.remove('removed');
+    btn.textContent = 'הסר';
+  } else {
+    removedWords.add(i);
+    row.classList.add('removed');
+    btn.textContent = 'שחזר';
+  }
+  localStorage.setItem('removedWords2', JSON.stringify([...removedWords]));
+}
+
+function toggleSentences() {
+  showSentences = !showSentences;
+  document.getElementById('toggleBtn').className = 'toggle-btn' + (showSentences ? '' : ' off');
+  document.querySelectorAll('.sentence').forEach(s => s.style.display = showSentences ? '' : 'none');
+}
+
+// ElevenLabs TTS
+async function speakElevenLabs(text, onEnd) {
+  const voiceName = document.getElementById('voiceSelect').value;
+  const speed = parseFloat(document.getElementById('speedSelect').value);
+
+  // Get voice ID by name
+  const voiceMap = {
+    'Rachel':'21m00Tcm4TlvDq8ikWAM','Drew':'29vD33N1lfxGZTQFgRN',
+    'Clyde':'2EiwWnXFnvU5JabPnv8n','Paul':'5Q0t7uMcjvnagumLfvZi',
+    'Domi':'AZnzlk1XvdvUeBnXmlld','Dave':'CYw3kZ02Govck1ngkdoI',
+    'Fin':'D38z5RcWu1voky8WS1ja','Bella':'EXAVITQu4vr4xnSDxMaL',
+    'Antoni':'ErXwobaYiN019PkySvjV','Thomas':'GBv7mTt0atIp3Br8iCZE',
+    'Charlie':'IKne5meyi320mud0r2Rr','Emily':'LcfcDJNUP1GQjkzn1xUU',
+    'Elli':'MF3mGyEYCl7XYWbV9V6O','Callum':'N2lVS1w4EtoT3dr4eOWO',
+    'Patrick':'ODq5zmih8GrVes37Dy9p','Harry':'SOYHLrjzK2X1ezoPC9cr',
+    'Liam':'TX3LPaxmHKxFdv7VOQHJ','Dorothy':'ThT5KcBeYPX3keUQqHPh',
+    'Josh':'TxGEqnHWrfWFTfGW9XjX','Arnold':'VR6AewLTigWG4xSOukaG',
+    'Charlotte':'XB0fDUnXU5powFXDhCwa','Matilda':'XrExE9yKIg1WjnnlVkGX',
+    'Matthew':'Yko7PKHZNXotIFUBG7I9','James':'ZQe5CZNOzWyzPSCn5a3c',
+    'Joseph':'Zlb1dXrM653N07WRdFW3','Jeremy':'bVMeCyTHy58xNoL34h3p',
+    'Michael':'flq6f7yk4E4fJM5XTYuZ','Ethan':'g5CIjZEefAph4nQFvHAz',
+    'Chris':'iP95p4xoKVk53GoZ742B','Gigi':'jBpfuIE2acCO8z3wKNLl',
+    'Freya':'jsCqWAovK2LkecY7zXl4','Grace':'oWAxZDx7w5VEj9dCyTzz',
+    'Daniel':'onwK4e9ZLuTAKqWW03F9','Lily':'pFZP5JQG7iQjIQuC4Bku',
+    'Serena':'pMsXgVXv3BLzUgSXRplE','Adam':'pNInz6obpgDQGcFmaJgB',
+    'Nicole':'piTKgcLEGmPE4e6mEKli','Bill':'pqHfZKP75CvOlQylNhV4',
+    'Jessie':'t0jbNlBVZ17f02VDIeMI','Sam':'yoZ06aMxZJJ28mfd3POQ',
+    'Glinda':'z9fAnlkpzviPz146aGWa','Giovanni':'zcAOhNBS3c14rBihAFp1',
+    'Mimi':'zrHiDhphv9ZnVXBqCLjz'
+  };
+
+  const voiceId = voiceMap[voiceName] || voiceMap['Rachel'];
+
+  try {
+    const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
+      method: 'POST',
+      headers: {
+        'xi-api-key': API_KEY,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        text: text,
+        model_id: 'eleven_monolingual_v1',
+        voice_settings: {
+          stability: 0.5,
+          similarity_boost: 0.75,
+          speed: speed
+        }
+      })
+    });
+
+    if (!response.ok) {
+      console.error('ElevenLabs error:', response.status);
+      onEnd(); return;
+    }
+
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+
+    if (currentAudio) {
+      currentAudio.pause();
+      currentAudio = null;
+    }
+
+    currentAudio = new Audio(url);
+    currentAudio.onended = () => { URL.revokeObjectURL(url); onEnd(); };
+    currentAudio.onerror = () => { URL.revokeObjectURL(url); onEnd(); };
+    currentAudio.play();
+
+  } catch(err) {
+    console.error('TTS error:', err);
+    onEnd();
+  }
+}
+
+let isReading = false, currentIndex = 0, stopFlag = false;
+
+function continueReading() { startReading(currentIndex); }
+function restartReading() { currentIndex = 0; startReading(0); }
+
+function startReading(fromIndex = 0) {
+  stopFlag = false; isReading = true; currentIndex = fromIndex;
+  document.getElementById('btnPlay').style.display = 'none';
+  document.getElementById('btnRestart').style.display = 'none';
+  document.getElementById('btnStop').style.display = 'inline-block';
+  readNext();
+}
+
+function stopReading() {
+  stopFlag = true; isReading = false;
+  if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+  document.querySelectorAll('.row.active').forEach(r => r.classList.remove('active'));
+  document.getElementById('btnPlay').style.display = 'inline-block';
+  document.getElementById('btnStop').style.display = 'none';
+  document.getElementById('btnRestart').style.display = currentIndex > 0 ? 'inline-block' : 'none';
+  document.getElementById('btnPlay').textContent = currentIndex > 0 ? '▶ המשך' : '▶ הקרא הכל';
+  document.getElementById('statusText').textContent = currentIndex > 0 ? `עצרת במילה ${currentIndex+1}: ${words[currentIndex]?.[0]||''}` : 'לחץ על מילה או הקרא הכל';
+  document.getElementById('progress').style.width = Math.round((currentIndex/words.length)*100)+'%';
+}
+
+function readNext() {
+  while (currentIndex < words.length && removedWords.has(currentIndex)) currentIndex++;
+  if (stopFlag || currentIndex >= words.length) {
+    if (!stopFlag) document.getElementById('statusText').textContent = '✓ סיימנו!';
+    stopReading(); return;
+  }
+
+  document.querySelectorAll('.row.active').forEach(r => r.classList.remove('active'));
+  const row = document.getElementById('row-' + currentIndex);
+  row.classList.add('active');
+  row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+  document.getElementById('progress').style.width = Math.round((currentIndex/words.length)*100)+'%';
+  document.getElementById('statusText').textContent = words[currentIndex][0];
+
+  const savedIndex = currentIndex;
+
+  speakElevenLabs(words[currentIndex][0], () => {
+    if (stopFlag) { currentIndex = savedIndex; return; }
+    if (showSentences) {
+      speakElevenLabs(words[currentIndex][2], () => {
+        if (stopFlag) { currentIndex = savedIndex; return; }
+        currentIndex++;
+        setTimeout(readNext, 300);
+      });
+    } else {
+      currentIndex++;
+      setTimeout(readNext, 300);
+    }
+  });
+}
+</script>
+</body>
+</html>
