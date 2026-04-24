@@ -13,29 +13,19 @@
     padding-bottom: 100px;
   }
   .sticky-bar {
-    position: sticky;
-    top: 0;
-    background: #111;
-    z-index: 99;
-    padding: 10px 14px;
+    position: sticky; top: 0; background: #111;
+    z-index: 99; padding: 10px 14px;
     border-bottom: 1px solid #2a2a2a;
   }
   .bar-row1, .bar-row2, .bar-row3 {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-    margin-bottom: 8px;
+    display: flex; align-items: center;
+    gap: 8px; flex-wrap: wrap; margin-bottom: 8px;
   }
   .bar-row3 { margin-bottom: 0; }
   .title { flex: 1; font-size: 0.8rem; color: #777; min-width: 80px; }
   .btn {
-    padding: 9px 18px;
-    border-radius: 24px;
-    border: none;
-    font-size: 0.92rem;
-    font-weight: 700;
-    cursor: pointer;
+    padding: 9px 18px; border-radius: 24px; border: none;
+    font-size: 0.92rem; font-weight: 700; cursor: pointer;
   }
   .btn:active { opacity: 0.7; }
   #btnPlay { background: #f0c040; color: #111; }
@@ -43,9 +33,8 @@
   #btnRestart { background: #333; color: #aaa; border: 1px solid #444; font-size: 0.8rem; padding: 7px 12px; display: none; }
   .toggle-btn {
     background: #1a3a1a; color: #6fda6f;
-    border: 1px solid #3a6a3a;
-    padding: 7px 12px; border-radius: 20px;
-    font-size: 0.78rem; cursor: pointer;
+    border: 1px solid #3a6a3a; padding: 7px 12px;
+    border-radius: 20px; font-size: 0.78rem; cursor: pointer;
   }
   .toggle-btn.off { background: #222; color: #666; border-color: #333; }
   .voice-group { display: flex; align-items: center; gap: 5px; flex: 1; min-width: 140px; }
@@ -58,16 +47,13 @@
   .counter { font-size: 0.72rem; color: #888; flex: 1; }
   .counter b { color: #f0c040; }
   .progress {
-    position: fixed; top: 0; left: 0;
-    height: 3px; background: #f0c040;
-    width: 0; transition: width 0.3s; z-index: 999;
+    position: fixed; top: 0; left: 0; height: 3px;
+    background: #f0c040; width: 0; transition: width 0.3s; z-index: 999;
   }
   .words { padding: 6px 0; }
   .row {
-    padding: 13px 16px;
-    border-bottom: 1px solid #1e1e1e;
-    scroll-margin-top: 130px;
-    transition: background 0.2s;
+    padding: 13px 16px; border-bottom: 1px solid #1e1e1e;
+    scroll-margin-top: 130px; transition: background 0.2s;
   }
   .row.active { background: #1c1800; }
   .row.known { display: none; }
@@ -80,8 +66,7 @@
   .he {
     font-size: 0.88rem; color: #bbb; direction: rtl; text-align: right;
     background: #1e1e1e; padding: 3px 10px; border-radius: 6px;
-    cursor: pointer; user-select: none;
-    transition: filter 0.2s; filter: blur(5px);
+    cursor: pointer; user-select: none; filter: blur(5px); transition: filter 0.2s;
   }
   .he.revealed { filter: blur(0); background: #2a3a4a; }
   .speaker { font-size: 1rem; opacity: 0; flex-shrink: 0; }
@@ -91,19 +76,17 @@
     background: transparent; border: 2px solid #553333; color: #a66;
     width: 32px; height: 32px; border-radius: 50%; font-size: 0.9rem;
     cursor: pointer; flex-shrink: 0; display: flex;
-    align-items: center; justify-content: center; padding: 0; transition: all 0.2s;
+    align-items: center; justify-content: center; padding: 0;
   }
-  .trash-btn:active { transform: scale(0.9); }
   .row.known .trash-btn { background: #2a5a2a; border-color: #6fda6f; color: #fff; }
   .sentence-box { margin-top: 8px; padding-right: 36px; }
   .sentence { font-size: 0.85rem; color: #888; font-style: italic; line-height: 1.5; cursor: pointer; }
   .row.active .sentence { color: #ccc; }
   .sentence-he {
     margin-top: 6px; font-size: 0.82rem; color: #999;
-    direction: rtl; text-align: right;
-    background: #1a1a1a; padding: 6px 10px; border-radius: 6px;
-    cursor: pointer; user-select: none;
-    transition: filter 0.2s; filter: blur(5px); line-height: 1.5;
+    direction: rtl; text-align: right; background: #1a1a1a;
+    padding: 6px 10px; border-radius: 6px; cursor: pointer;
+    user-select: none; filter: blur(5px); transition: filter 0.2s; line-height: 1.5;
   }
   .sentence-he.revealed { filter: blur(0); background: #1a2a2a; color: #bbb; }
 </style>
@@ -136,7 +119,6 @@
         <option value="Dorothy">Dorothy — בריטי</option>
         <option value="James">James — אוסטרלי</option>
         <option value="Lily">Lily — בריטי</option>
-        <option value="Matilda">Matilda — אוסטרלי</option>
         <option value="Nicole">Nicole — נשי</option>
         <option value="Serena">Serena — נשי</option>
       </select>
@@ -170,42 +152,37 @@ const voiceMap = {
   'Dave':'CYw3kZ02Govck1ngkdoI','Domi':'AZnzlk1XvdvUeBnXmlld',
   'Fin':'D38z5RcWu1voky8WS1ja','Dorothy':'ThT5KcBeYPX3keUQqHPh',
   'James':'ZQe5CZNOzWyzPSCn5a3c','Lily':'pFZP5JQG7iQjIQuC4Bku',
-  'Matilda':'XrExE9yKIg1WjnnlVkGX','Nicole':'piTKgcLEGmPE4e6mEKli',
-  'Serena':'pMsXgVXv3BLzUgSXRplE'
+  'Nicole':'piTKgcLEGmPE4e6mEKli','Serena':'pMsXgVXv3BLzUgSXRplE'
 };
 
 let currentAudio = null;
 let isReading = false;
 let stopFlag = false;
 let currentIndex = 0;
+let showSentences = true;
 
 async function speakEL(text, onEnd) {
   if (stopFlag) { onEnd(); return; }
-  const voiceName = document.getElementById('voiceSelect').value;
+  const voiceId = voiceMap[document.getElementById('voiceSelect').value] || voiceMap['Rachel'];
   const speed = parseFloat(document.getElementById('speedSelect').value);
-  const voiceId = voiceMap[voiceName] || voiceMap['Rachel'];
   try {
-    const response = await fetch('https://api.elevenlabs.io/v1/text-to-speech/' + voiceId, {
+    const res = await fetch('https://api.elevenlabs.io/v1/text-to-speech/' + voiceId, {
       method: 'POST',
       headers: { 'xi-api-key': API_KEY, 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        text: text,
+        text,
         model_id: 'eleven_monolingual_v1',
-        voice_settings: { stability: 0.5, similarity_boost: 0.75, speed: speed }
+        voice_settings: { stability: 0.5, similarity_boost: 0.75, speed }
       })
     });
-    if (!response.ok) { onEnd(); return; }
-    const blob = await response.blob();
-    const url = URL.createObjectURL(blob);
+    if (!res.ok) { onEnd(); return; }
+    const url = URL.createObjectURL(await res.blob());
     if (currentAudio) { currentAudio.pause(); currentAudio = null; }
     currentAudio = new Audio(url);
     currentAudio.onended = () => { URL.revokeObjectURL(url); onEnd(); };
     currentAudio.onerror = () => { URL.revokeObjectURL(url); onEnd(); };
-    await currentAudio.play();
-  } catch(err) {
-    console.error('EL error:', err);
-    onEnd();
-  }
+    currentAudio.play();
+  } catch(e) { onEnd(); }
 }
 
 const words = [
@@ -325,7 +302,7 @@ const words = [
   ["Various","מגוון","The shop offers various options for vegetarian customers.","החנות מציעה מגוון אפשרויות ללקוחות צמחוניים."],
   ["Poll","סקר, הצבעה","A recent poll showed strong support for the new plan.","סקר אחרון הראה תמיכה חזקה בתוכנית החדשה."],
   ["Manage","לנהל","She manages to balance her career and family beautifully.","היא מצליחה לנהל יפה את הקריירה והמשפחה שלה."],
-  ["Misconception","דעה מוטעית","It's a common misconception that sugar causes hyperactivity.","זו דעה מוטעית נפוצה שסוכר גורם להיפראקטיביות."],
+  ["Misconception","דעה מוטעית","It is a common misconception that sugar causes hyperactivity.","זו דעה מוטעית נפוצה שסוכר גורם להיפראקטיביות."],
   ["Forfeit","לוותר, להפסיד","If you don't show up, you will forfeit your spot.","אם לא תגיעי, תפסידי את המקום שלך."],
   ["Ward","מחלקה","The maternity ward was full of new parents and babies.","מחלקת היולדות הייתה מלאה בהורים טריים ותינוקות."],
   ["Spectator","צופה, משקיף","Every spectator stood up to cheer for the winning team.","כל צופה קם לעודד את הקבוצה המנצחת."],
@@ -348,13 +325,9 @@ const words = [
   ["Ignorance","בורות","Ignorance of current events can lead to poor decisions.","בורות לגבי אירועים אקטואליים יכולה להוביל להחלטות גרועות."]
 ];
 
-let showSentences = true;
 let knownWords = {};
 try { knownWords = JSON.parse(localStorage.getItem('knownWords2') || '{}'); } catch(e) {}
-
-function saveKnown() {
-  try { localStorage.setItem('knownWords2', JSON.stringify(knownWords)); } catch(e) {}
-}
+function saveKnown() { try { localStorage.setItem('knownWords2', JSON.stringify(knownWords)); } catch(e) {} }
 
 const list = document.getElementById('wordList');
 words.forEach((w, i) => {
@@ -378,22 +351,10 @@ words.forEach((w, i) => {
     if (e.target.classList.contains('he') || e.target.classList.contains('trash-btn')) return;
     if (!isReading) { currentIndex = i; startReading(i); }
   };
-  row.querySelector('.sentence').onclick = (e) => {
-    e.stopPropagation();
-    if (!isReading) { currentIndex = i; startReading(i); }
-  };
-  row.querySelector('.he').onclick = (e) => {
-    e.stopPropagation();
-    e.target.classList.toggle('revealed');
-  };
-  row.querySelector('.sentence-he').onclick = (e) => {
-    e.stopPropagation();
-    e.target.classList.toggle('revealed');
-  };
-  row.querySelector('.trash-btn').onclick = (e) => {
-    e.stopPropagation();
-    toggleKnown(i);
-  };
+  row.querySelector('.sentence').onclick = (e) => { e.stopPropagation(); if (!isReading) { currentIndex = i; startReading(i); } };
+  row.querySelector('.he').onclick = (e) => { e.stopPropagation(); e.target.classList.toggle('revealed'); };
+  row.querySelector('.sentence-he').onclick = (e) => { e.stopPropagation(); e.target.classList.toggle('revealed'); };
+  row.querySelector('.trash-btn').onclick = (e) => { e.stopPropagation(); toggleKnown(i); };
   list.appendChild(row);
 });
 
@@ -408,15 +369,16 @@ function toggleKnown(i) {
 }
 
 function updateCounter() {
-  const knownCount = words.filter(w => knownWords[w[0]]).length;
-  document.getElementById('counter').innerHTML = `ללימוד: <b>${words.length - knownCount}</b> | יודעת: <b>${knownCount}</b>`;
+  const k = words.filter(w => knownWords[w[0]]).length;
+  document.getElementById('counter').innerHTML = `ללימוד: <b>${words.length - k}</b> | יודעת: <b>${k}</b>`;
 }
 
 function toggleShowKnown() {
   const btn = document.getElementById('showKnownBtn');
   document.body.classList.toggle('show-known');
-  btn.className = document.body.classList.contains('show-known') ? 'toggle-btn' : 'toggle-btn off';
-  btn.textContent = document.body.classList.contains('show-known') ? 'הסתר ידועות' : 'הצג ידועות';
+  const on = document.body.classList.contains('show-known');
+  btn.className = on ? 'toggle-btn' : 'toggle-btn off';
+  btn.textContent = on ? 'הסתר ידועות' : 'הצג ידועות';
 }
 
 function resetKnown() {
@@ -441,15 +403,15 @@ function findNextActive(from) {
 
 function continueReading() { startReading(currentIndex); }
 function restartReading() {
-  const next = findNextActive(0);
-  if (next === -1) { alert('סימנת את כל המילים!'); return; }
-  startReading(next);
+  const n = findNextActive(0);
+  if (n === -1) { alert('סימנת את כל המילים!'); return; }
+  startReading(n);
 }
 
-function startReading(fromIndex) {
-  const next = findNextActive(fromIndex);
-  if (next === -1) { alert('סימנת את כל המילים!'); return; }
-  stopFlag = false; isReading = true; currentIndex = next;
+function startReading(from) {
+  const n = findNextActive(from);
+  if (n === -1) { alert('סימנת את כל המילים!'); return; }
+  stopFlag = false; isReading = true; currentIndex = n;
   document.getElementById('btnPlay').style.display = 'none';
   document.getElementById('btnRestart').style.display = 'none';
   document.getElementById('btnStop').style.display = 'inline-block';
@@ -470,12 +432,12 @@ function stopReading() {
 
 function readNext() {
   if (stopFlag) return;
-  const next = findNextActive(currentIndex);
-  if (next === -1) {
+  const n = findNextActive(currentIndex);
+  if (n === -1) {
     document.getElementById('statusText').textContent = '✓ סיימנו!';
     stopReading(); return;
   }
-  currentIndex = next;
+  currentIndex = n;
 
   document.querySelectorAll('.row.active').forEach(r => r.classList.remove('active'));
   const row = document.getElementById('row-' + currentIndex);
@@ -484,28 +446,27 @@ function readNext() {
   document.getElementById('progress').style.width = Math.round((currentIndex / words.length) * 100) + '%';
   document.getElementById('statusText').textContent = words[currentIndex][0];
 
+  const savedIndex = currentIndex;
   const en = words[currentIndex][0];
   const sentence = words[currentIndex][2];
-  const savedIndex = currentIndex;
 
-  // קרא מילה → המתן → קרא משפט
-  speakEL(en, () => {
-    if (stopFlag) { currentIndex = savedIndex; return; }
-    if (!showSentences) {
-      currentIndex++;
-      setTimeout(readNext, 400);
-      return;
-    }
-    // המתנה של שנייה לחשיבה
-    setTimeout(() => {
+  if (showSentences) {
+    // קרא מילה, אז מיד קרא משפט
+    speakEL(en, () => {
       if (stopFlag) { currentIndex = savedIndex; return; }
       speakEL(sentence, () => {
         if (stopFlag) { currentIndex = savedIndex; return; }
         currentIndex++;
         setTimeout(readNext, 400);
       });
-    }, 0);
-  });
+    });
+  } else {
+    speakEL(en, () => {
+      if (stopFlag) { currentIndex = savedIndex; return; }
+      currentIndex++;
+      setTimeout(readNext, 400);
+    });
+  }
 }
 
 document.addEventListener('visibilitychange', () => {
