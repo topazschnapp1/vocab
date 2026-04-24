@@ -3,265 +3,109 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>תרגול מילים</title>
+<title>מילון - גרסה 2</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap');
-
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
-    background: #0a0a0c;
+    background: #111;
     color: #f0f0f0;
-    font-family: 'DM Sans', sans-serif;
-    padding-bottom: 120px;
-    -webkit-tap-highlight-color: transparent;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    padding-bottom: 100px;
   }
-
   .sticky-bar {
     position: sticky;
     top: 0;
-    background: rgba(10,10,12,0.95);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    background: #111;
     z-index: 99;
-    padding: 10px 14px 12px;
-    border-bottom: 1px solid #1a1a20;
+    padding: 10px 14px;
+    border-bottom: 1px solid #2a2a2a;
   }
-
-  .bar-row {
+  .bar-row1, .bar-row2, .bar-row3 {
     display: flex;
     align-items: center;
-    gap: 7px;
+    gap: 8px;
     flex-wrap: wrap;
     margin-bottom: 8px;
   }
-  .bar-row:last-child { margin-bottom: 0; }
-
-  .title {
-    flex: 1;
-    font-size: 0.78rem;
-    color: #555;
-    min-width: 70px;
-    font-family: 'DM Mono', monospace;
-  }
-
+  .bar-row3 { margin-bottom: 0; }
+  .title { flex: 1; font-size: 0.8rem; color: #777; min-width: 80px; }
   .btn {
-    padding: 8px 16px;
-    border-radius: 22px;
+    padding: 9px 18px;
+    border-radius: 24px;
     border: none;
-    font-size: 0.85rem;
+    font-size: 0.92rem;
     font-weight: 700;
     cursor: pointer;
-    font-family: 'DM Sans', sans-serif;
-    transition: transform 0.1s;
   }
-  .btn:active { transform: scale(0.95); }
-  #btnPlay { background: #e8b931; color: #111; }
-  #btnStop { background: #e84040; color: #fff; display: none; }
-  #btnRestart { background: #1e1e24; color: #888; border: 1px solid #333; font-size: 0.78rem; padding: 7px 12px; display: none; }
-
-  .pill {
-    padding: 6px 12px;
-    border-radius: 18px;
-    font-size: 0.75rem;
-    cursor: pointer;
-    font-family: 'DM Sans', sans-serif;
-    font-weight: 500;
-    border: 1px solid;
-    transition: transform 0.1s;
+  .btn:active { opacity: 0.7; }
+  #btnPlay { background: #f0c040; color: #111; }
+  #btnStop { background: #ff4444; color: #fff; display: none; }
+  #btnRestart { background: #333; color: #aaa; border: 1px solid #444; font-size: 0.8rem; padding: 7px 12px; display: none; }
+  .toggle-btn {
+    background: #1a3a1a; color: #6fda6f;
+    border: 1px solid #3a6a3a;
+    padding: 7px 12px; border-radius: 20px;
+    font-size: 0.78rem; cursor: pointer;
   }
-  .pill:active { transform: scale(0.95); }
-
-  .pill-green {
-    background: #0d1f0d;
-    color: #5ec45e;
-    border-color: #2a4a2a;
-  }
-  .pill-green.off {
-    background: #161618;
-    color: #555;
-    border-color: #2a2a2e;
-  }
-
-  .pill-red {
-    background: #1f0d0d;
-    color: #e86060;
-    border-color: #4a2a2a;
-  }
-  .pill-red.off {
-    background: #161618;
-    color: #555;
-    border-color: #2a2a2e;
-  }
-
-  .pill-blue {
-    background: #0d1520;
-    color: #60a0e8;
-    border-color: #2a3a5a;
-  }
-
-  .remove-btn {
-    padding: 6px 12px;
-    border-radius: 18px;
-    font-size: 0.75rem;
-    cursor: pointer;
-    font-family: 'DM Sans', sans-serif;
-    font-weight: 700;
-    border: 1px solid #5a2a2a;
-    background: #2a0d0d;
-    color: #ff6060;
-    display: none;
-    transition: transform 0.1s;
-  }
-  .remove-btn:active { transform: scale(0.95); }
-
-  .count-text {
-    font-size: 0.7rem;
-    color: #444;
-    font-family: 'DM Mono', monospace;
-    margin-left: auto;
-  }
-  .count-text b { color: #e8b931; }
-
-  .voice-group {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    flex: 1;
-    min-width: 130px;
-  }
-  .voice-label {
-    font-size: 0.7rem;
-    color: #555;
-    white-space: nowrap;
-  }
+  .toggle-btn.off { background: #222; color: #666; border-color: #333; }
+  .voice-group { display: flex; align-items: center; gap: 5px; flex: 1; min-width: 140px; }
+  .voice-label { font-size: 0.72rem; color: #666; white-space: nowrap; }
   select {
-    flex: 1;
-    background: #141418;
-    color: #ccc;
-    border: 1px solid #2a2a2e;
-    border-radius: 8px;
-    padding: 5px 8px;
-    font-size: 0.72rem;
-    outline: none;
-    max-width: 170px;
-    font-family: 'DM Sans', sans-serif;
+    flex: 1; background: #1e1e1e; color: #ddd;
+    border: 1px solid #333; border-radius: 8px;
+    padding: 5px 8px; font-size: 0.75rem; outline: none; max-width: 180px;
   }
-
+  .counter { font-size: 0.72rem; color: #888; flex: 1; }
+  .counter b { color: #f0c040; }
   .progress {
-    position: fixed;
-    top: 0; left: 0;
-    height: 3px;
-    background: linear-gradient(90deg, #e8b931, #f0d060);
-    width: 0;
-    transition: width 0.3s;
-    z-index: 999;
+    position: fixed; top: 0; left: 0;
+    height: 3px; background: #f0c040;
+    width: 0; transition: width 0.3s; z-index: 999;
   }
-
-  .words { padding: 4px 0; }
-
+  .words { padding: 6px 0; }
   .row {
-    padding: 14px 16px;
-    border-bottom: 1px solid #141418;
-    scroll-margin-top: 140px;
+    padding: 13px 16px;
+    border-bottom: 1px solid #1e1e1e;
+    scroll-margin-top: 130px;
     transition: background 0.2s;
-    cursor: pointer;
-    position: relative;
   }
-  .row:active { background: #12121a; }
-  .row.active { background: #18160a; }
-  .row.marked { background: #140808; }
-  .row.removed { display: none; }
-
-  .row-top {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .num {
-    font-size: 0.68rem;
-    color: #333;
-    min-width: 24px;
-    font-family: 'DM Mono', monospace;
-  }
-
-  .check-box {
-    width: 22px;
-    height: 22px;
-    border-radius: 6px;
-    border: 2px solid #2a2a2e;
-    background: #141418;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    font-size: 0.65rem;
-    cursor: pointer;
-    transition: all 0.15s;
-  }
-  .check-box.visible { display: flex; }
-  .check-box.checked {
-    background: #e84040;
-    border-color: #e84040;
-    color: #fff;
-  }
-
-  .en {
-    font-size: 1.05rem;
-    font-weight: 700;
-    flex: 1;
-    color: #eee;
-    letter-spacing: -0.01em;
-  }
-  .row.active .en { color: #e8b931; }
-  .row.marked .en { color: #e86060; text-decoration: line-through; }
-
-  .he-wrap {
-    direction: rtl;
-    text-align: right;
-    flex-shrink: 0;
-  }
+  .row.active { background: #1c1800; }
+  .row.known { display: none; }
+  body.show-known .row.known { display: block; opacity: 0.35; background: #0a1a0a; }
+  .row-top { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+  .num { font-size: 0.7rem; color: #444; min-width: 26px; }
+  .en { font-size: 1.05rem; font-weight: 700; flex: 1; color: #fff; }
+  .row.active .en { color: #f0c040; }
+  .row.known .en { text-decoration: line-through; color: #6fda6f; }
   .he {
-    font-size: 0.85rem;
-    color: #888;
-    padding: 3px 10px;
-    border-radius: 6px;
-    background: #141418;
-    display: inline-block;
-    filter: blur(7px);
-    transition: filter 0.3s ease;
-    cursor: pointer;
-    user-select: none;
-    -webkit-user-select: none;
+    font-size: 0.88rem; color: #bbb; direction: rtl; text-align: right;
+    background: #1e1e1e; padding: 3px 10px; border-radius: 6px;
+    cursor: pointer; user-select: none;
+    transition: filter 0.2s; filter: blur(5px);
   }
-  .he.revealed {
-    filter: blur(0);
-    background: #0d1f0d;
-    color: #7eda7e;
+  .he.revealed { filter: blur(0); background: #2a3a4a; }
+  .speaker { font-size: 1rem; opacity: 0; flex-shrink: 0; }
+  .row.active .speaker { opacity: 1; animation: pulse 0.7s ease-in-out infinite alternate; }
+  @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.3); } }
+  .trash-btn {
+    background: transparent; border: 2px solid #553333; color: #a66;
+    width: 32px; height: 32px; border-radius: 50%; font-size: 0.9rem;
+    cursor: pointer; flex-shrink: 0; display: flex;
+    align-items: center; justify-content: center; padding: 0; transition: all 0.2s;
   }
-  .row.active .he.revealed { color: #a0f0a0; }
-  .row.marked .he { filter: blur(7px); }
-
-  .speaker { font-size: 0.95rem; opacity: 0; flex-shrink: 0; }
-  .row.active .speaker {
-    opacity: 1;
-    animation: pulse 0.7s ease-in-out infinite alternate;
+  .trash-btn:active { transform: scale(0.9); }
+  .row.known .trash-btn { background: #2a5a2a; border-color: #6fda6f; color: #fff; }
+  .sentence-box { margin-top: 8px; padding-right: 36px; }
+  .sentence { font-size: 0.85rem; color: #888; font-style: italic; line-height: 1.5; cursor: pointer; }
+  .row.active .sentence { color: #ccc; }
+  .sentence-he {
+    margin-top: 6px; font-size: 0.82rem; color: #999;
+    direction: rtl; text-align: right;
+    background: #1a1a1a; padding: 6px 10px; border-radius: 6px;
+    cursor: pointer; user-select: none;
+    transition: filter 0.2s; filter: blur(5px); line-height: 1.5;
   }
-  @keyframes pulse {
-    from { transform: scale(1); }
-    to { transform: scale(1.25); }
-  }
-
-  .sentence {
-    margin-top: 7px;
-    padding-right: 34px;
-    font-size: 0.8rem;
-    color: #3a3a44;
-    font-style: italic;
-    line-height: 1.45;
-    font-family: 'DM Mono', monospace;
-  }
-  .row.active .sentence { color: #888; }
+  .sentence-he.revealed { filter: blur(0); background: #1a2a2a; color: #bbb; }
 </style>
 </head>
 <body>
@@ -269,48 +113,36 @@
 <div class="progress" id="progress"></div>
 
 <div class="sticky-bar">
-  <div class="bar-row">
-    <span class="title" id="statusText">לחץ על מילה או הקרא הכל</span>
-    <button class="pill pill-green" id="toggleBtn" onclick="toggleSentences()">📝 משפטים</button>
-    <button class="pill pill-red off" id="modeBtn" onclick="toggleMode()">🗑 סמן</button>
-    <button class="remove-btn" id="removeBtn" onclick="removeMarked()"></button>
-  </div>
-  <div class="bar-row">
+  <div class="bar-row1">
+    <span class="title" id="statusText">לחץ על שורה או הקרא הכל</span>
+    <button class="toggle-btn" id="toggleBtn" onclick="toggleSentences()">📝 משפטים</button>
     <button class="btn" id="btnRestart" onclick="restartReading()">↩ התחלה</button>
     <button class="btn" id="btnPlay" onclick="continueReading()">▶ הקרא הכל</button>
     <button class="btn" id="btnStop" onclick="stopReading()">■ עצור</button>
-    <button class="pill pill-blue" id="undoBtn" onclick="undoRemove()" style="display:none">↩ בטל</button>
-    <button class="pill pill-blue" id="restoreBtn" onclick="restoreAll()" style="display:none">🔄 שחזר</button>
-    <span class="count-text"><b id="remainCount">0</b> / <span id="totalCount">0</span></span>
   </div>
-  <div class="bar-row">
+  <div class="bar-row2">
     <div class="voice-group">
       <span class="voice-label">🎙 קול:</span>
       <select id="voiceSelect">
         <option value="Rachel">Rachel — נשי</option>
         <option value="Drew">Drew — גברי</option>
-        <option value="Clyde">Clyde — גברי</option>
-        <option value="Paul">Paul — גברי</option>
-        <option value="Domi">Domi — נשי</option>
-        <option value="Dave">Dave — בריטי</option>
-        <option value="Fin">Fin — אירי</option>
         <option value="Bella">Bella — נשי</option>
+        <option value="Daniel">Daniel — בריטי</option>
         <option value="Emily">Emily — נשי</option>
         <option value="Charlie">Charlie — אוסטרלי</option>
+        <option value="Dave">Dave — בריטי</option>
+        <option value="Domi">Domi — נשי</option>
+        <option value="Fin">Fin — אירי</option>
         <option value="Dorothy">Dorothy — בריטי</option>
-        <option value="Charlotte">Charlotte — שוודי</option>
-        <option value="Matilda">Matilda — אוסטרלי</option>
         <option value="James">James — אוסטרלי</option>
-        <option value="Joseph">Joseph — בריטי</option>
-        <option value="Daniel">Daniel — בריטי</option>
         <option value="Lily">Lily — בריטי</option>
-        <option value="Grace">Grace — נשי</option>
-        <option value="Serena">Serena — נשי</option>
+        <option value="Matilda">Matilda — אוסטרלי</option>
         <option value="Nicole">Nicole — נשי</option>
+        <option value="Serena">Serena — נשי</option>
       </select>
     </div>
     <div class="voice-group">
-      <span class="voice-label">⚡</span>
+      <span class="voice-label">⚡ מהירות:</span>
       <select id="speedSelect">
         <option value="0.7">איטי</option>
         <option value="0.85">איטי-בינוני</option>
@@ -319,376 +151,41 @@
       </select>
     </div>
   </div>
+  <div class="bar-row3">
+    <span class="counter" id="counter">ללימוד: <b>0</b> | יודעת: <b>0</b></span>
+    <button class="toggle-btn off" id="showKnownBtn" onclick="toggleShowKnown()">👁 הצג ידועות</button>
+    <button class="toggle-btn off" onclick="resetKnown()">🔄 אפס הכל</button>
+  </div>
 </div>
 
 <div class="words" id="wordList"></div>
 
 <script>
-const words = [
-  ["Accelerate","להאיץ","Global warming continues to accelerate at an alarming rate."],
-  ["Accommodate","לאכסן, לשכן","The new dormitory can accommodate 500 students comfortably."],
-  ["Accompany","ללוות","Soft music accompanied the candlelit dinner perfectly."],
-  ["Accustomed","מורגל","After living abroad, she became accustomed to different cultures."],
-  ["Amass","לצבור, לערום","The squirrel amassed a huge pile of acorns before winter."],
-  ["Appeal","לערער / לבקש","The charity appealed to the public for urgent donations."],
-  ["Applicant","מועמד","The most qualified applicant was invited for a second interview."],
-  ["Audit","ביקורת","An independent audit revealed errors in the financial records."],
-  ["Bank","לערום / בנק / גדה","Wildflowers grew along the bank of the stream."],
-  ["Betray","לבגוד","His facial expression betrayed his true feelings."],
-  ["Blank","ריק, רווח","Her mind went blank during the oral exam."],
-  ["Broadcast","לשדר","The president's speech was broadcast to millions of viewers."],
-  ["Cargo","מטען","The plane's cargo included medical supplies for the disaster zone."],
-  ["Carve","לחרוט","The sculptor carved a beautiful angel out of marble."],
-  ["Certify","להצהיר, לאשר","The inspector certified the building as safe for occupancy."],
-  ["Circulate","לנוע במחזוריות / להפיץ","Rumors about the merger began to circulate around the office."],
-  ["Collision","התנגשות","The mid-air collision was narrowly avoided by the pilot."],
-  ["Commendably","באופן ראוי לשבח","The young soldier performed commendably under extreme pressure."],
-  ["Commends","לציין לשבח","The mayor commends volunteers who serve their community."],
-  ["Commentary","פרשנות","His sharp political commentary attracted a large online following."],
-  ["Companion","בן-זוג","A good book can be the perfect companion on a rainy day."],
-  ["Compatible","מתאים, ראוי","Their personalities were not compatible, leading to constant arguments."],
-  ["Compel","לאלץ, לחייב","Rising costs compelled the company to lay off workers."],
-  ["Compensate","לפצות","Nothing can compensate for the loss of a loved one."],
-  ["Compile","לאסוף, לקבץ","He compiled a playlist of his favorite songs from the 90s."],
-  ["Conceal","להסתיר","She wore sunglasses to conceal the tears in her eyes."],
-  ["Conceive","להרהר / לעבר","Who first conceived the idea of building a canal through Panama?"],
-  ["Concerted","מתואם","A concerted campaign was launched to clean up the beaches."],
-  ["Concur","להסכים","Most scientists concur that the vaccine is safe and effective."],
-  ["Concurrence","להתרחש בו זמנית","The concurrence of a holiday and a weekend created a long break."],
-  ["Condemned","לגנות / נידון ל-","Human rights organizations condemned the use of child labor."],
-  ["Confess","להודות","She confessed that she had never actually read the book."],
-  ["Confession","וידוי","His public confession stunned the entire nation."],
-  ["Confinement","מאסר, ריתוק","Solitary confinement can have devastating effects on mental health."],
-  ["Confiscate","להחרים","Airport security confiscated the bottle of liquid from the passenger."],
-  ["Conform","להתאים, להסתגל","She refused to conform to society's expectations of women."],
-  ["Confuse","לבלבל","People often confuse Austria with Australia on the map."],
-  ["Conquer","לכבוש","She conquered her fear of public speaking through practice."],
-  ["Conservation","שימור","The museum plays a key role in art conservation."],
-  ["Conserve","לשמר","They installed solar panels to conserve energy at home."],
-  ["Contend","להתמודד, לטעון","Small businesses must contend with rising rent prices."],
-  ["Convene","לכנס","The board will convene an emergency session this afternoon."],
-  ["Correspond","להתכתב / להתאים","The suspect's alibi did not correspond with the evidence."],
-  ["Correspondence","התכתבות","Their email correspondence spanned over a decade."],
-  ["Crack","סדק, לסדוק","Scientists are trying to crack the code of human aging."],
-  ["Crave","להשתוקק","Pregnant women sometimes crave unusual food combinations."],
-  ["Crude","וולגרי, גס / גולמי","The artist's crude sketches eventually became masterpieces."],
-  ["Deceased","נפטר","Flowers were placed on the grave of the deceased soldier."],
-  ["Deceive","להונות","The con artist deceived elderly people out of their savings."],
-  ["Deliberate","מכוון / לשקול, לדון","The jury will deliberate before announcing the verdict tomorrow."],
-  ["Deliberation","דיון","After hours of deliberation, the committee approved the budget."],
-  ["Delusions","אשליות, הזיות","She had delusions of grandeur, believing she was royalty."],
-  ["Denial","הכחשה","He lived in denial about the seriousness of his illness."],
-  ["Depend on","תלוי ב-","The outcome of the election depends on voter turnout."],
-  ["Desolate","הרוס / שומם, נטוש","The once-thriving town now stood desolate and forgotten."],
-  ["Detract","להפחית, לגרוע","A few minor errors should not detract from her overall achievement."],
-  ["Deviant","סוטה","The study examined deviant behavior in adolescent groups."],
-  ["Disregard","להתעלם","He showed a complete disregard for traffic regulations."],
-  ["Dissolve","להתמוסס","Parliament was dissolved ahead of the upcoming elections."],
-  ["Divine","אלוהי","The chef described the chocolate cake as absolutely divine."],
-  ["Divinity","אלוהות","Ancient Greeks believed in the divinity of their gods."],
-  ["Emblem","סמל","The olive branch is an emblem of peace around the world."],
-  ["Engrave","לחרוט","The watchmaker engraved a personal message on the back."],
-  ["Enhance","להעצים","Regular exercise can greatly enhance your quality of life."],
-  ["Exclude","למנוע, לשלול, להרחיק","The price excludes taxes and delivery charges."],
-  ["Excuse","לסלוח / תירוץ","There is no excuse for arriving late to a job interview."],
-  ["Exquisite","מצוין / חד, מעודן","The restaurant is known for its exquisite French cuisine."],
-  ["Extension","שלוחה","She requested an extension on the deadline for her thesis."],
-  ["Exterior","חיצוני","The exterior walls were covered in beautiful ivy."],
-  ["Extinction","הכחדה","Pollution and deforestation are driving many species toward extinction."],
-  ["Extract","לתמצת, להפיק","Dentists sometimes need to extract a damaged tooth."],
-  ["Flat","שטוח / דירה","She moved into a cozy flat overlooking the canal."],
-  ["Flew","עף","Time flew by during the exciting concert."],
-  ["Fly","לעוף / זבוב","Rumors fly fast in a small village."],
-  ["Foil","לסכל","Security cameras helped foil the bank heist."],
-  ["Forerunner","אות, סימן מבשר / חלוץ","The company was a forerunner in electric vehicle technology."],
-  ["Fossil","מאובן","The museum displayed a perfectly preserved fossil from the Ice Age."],
-  ["Genuine","אמיתי, מקורי","She showed genuine concern for her colleague's well-being."],
-  ["Grant","להעניק, מענק","The foundation granted funding for cancer research."],
-  ["Hectic","קדחתני","The holiday shopping season is always incredibly hectic."],
-  ["Heir","יורש","The billionaire's heir inherited a vast business empire."],
-  ["Heredity","תורשה","Eye color is determined largely by heredity."],
-  ["Immense","כביר, עצום","The team felt immense pride after winning the championship."],
-  ["Impulse","דחף","She bought the dress on a sudden impulse at the mall."],
-  ["Impulsively","ללא שיקול דעת","He impulsively booked a flight to Tokyo that same night."],
-  ["In favor of","לטובת","The jury ruled in favor of the plaintiff unanimously."],
-  ["Incentive","תמריץ","Free tuition serves as an incentive for academic excellence."],
-  ["Incidence","כמות, הִקָּרוּת","There has been a sharp rise in the incidence of cybercrime."],
-  ["Indifference","אדישות","Public indifference to climate change is deeply concerning."],
-  ["Inquire","לתשאל","Customers may inquire about delivery times on our website."],
-  ["Inquiry","חקירה","The police opened an inquiry into the cause of the fire."],
-  ["Interior","פנימי","The interior design featured warm wood tones and natural light."],
-  ["Intersection","צומת, הצטלבות","A new traffic light was installed at the dangerous intersection."],
-  ["Intervene","להתערב","The United Nations decided to intervene in the humanitarian crisis."],
-  ["Intervention","התערבות","Surgical intervention was necessary to save the patient's life."],
-  ["Lean","להישען","He leaned closer to hear the whispered secret."],
-  ["Legible","קריא","The old manuscript was barely legible after centuries of wear."],
-  ["Lens","עדשה","The photographer switched to a wide-angle lens for the landscape."],
-  ["License","רישיון / לאשר","The restaurant lost its license due to health violations."],
-  ["Literate","משכיל, מלומד","Being digitally literate is essential in the modern workplace."],
-  ["Load","להעמיס","They loaded the moving truck with furniture and boxes."],
-  ["Mediate","לגשר, לתווך","A professional counselor helped mediate between the feuding neighbors."],
-  ["Mediocre","בינוני (שלילי)","Despite the hype, the sequel was rather mediocre."],
-  ["Moist","לחות","The tropical climate kept the air warm and moist year-round."],
-  ["Moral","מוסר","The moral of the fable is that honesty always wins."],
-  ["Morale","מורל","Free lunches on Fridays boosted employee morale significantly."],
-  ["Nocturnal","לילי","Bats are nocturnal creatures that navigate using echolocation."],
-  ["Notice","לשים לב / התראה","She didn't notice the spelling mistake until after printing."],
-  ["Offshore","חו\"ל","Many tech companies set up offshore development centers in Asia."],
-  ["Orbit","לחוג, להסתובב","The satellite completed its first orbit around Mars successfully."],
-  ["Oriented","מכוון, מונחה","The course is oriented toward practical, hands-on learning."],
-  ["Outer","חיצוני","Scientists are exploring the outer reaches of our solar system."],
-  ["Overlooked","העלים עין","The detective overlooked a crucial piece of evidence at the scene."],
-  ["Parallel","מקביל","Her career path ran parallel to her sister's in many ways."],
-  ["Pattern","דוגמה","Researchers identified a worrying pattern in the patient's test results."],
-  ["Perceive","להבחין, לראות","Some people perceive change as a threat rather than an opportunity."],
-  ["Plausible","סביר, מתקבל על הדעת","The detective found only one plausible explanation for the crime."],
-  ["Plot","לזמום / חלקה / עלילה","The rebels plotted to overthrow the corrupt government."],
-  ["Prescribe","לרשום מרשם","The vet prescribed a special diet for the sick puppy."],
-  ["Prescription","מרשם","Pharmacists cannot sell certain drugs without a valid prescription."],
-  ["Pretext","אמתלה, תואנה","Under the pretext of friendship, she gathered information secretly."],
-  ["Project","פרוייקט / לתכנן / להקרין","Experts project that the population will double by 2060."],
-  ["Proponent","תומך","He has been a lifelong proponent of free public education."],
-  ["Proportion","שיעור, מידה","A growing proportion of the workforce now works remotely."],
-  ["Prosperity","צמיחה, שגשוג","Education is the foundation of long-term prosperity for any nation."],
-  ["Prosperous","משגשג, מצליח","The once-struggling village grew into a prosperous trading hub."],
-  ["Pump","משאבה, לשאוב","The heart pumps blood through the entire body nonstop."],
-  ["Pursue","לרדוף","After retirement, he decided to pursue his passion for painting."],
-  ["Pursuit","מרדף","The pursuit of happiness is a fundamental human right."],
-  ["Radically","באופן קיצוני","Smartphones have radically transformed the way we communicate."],
-  ["Ray","קרן, אלומת אור","A single ray of hope kept her going through the crisis."],
-  ["Razor","סכין גילוח","The barber sharpened his razor before the next appointment."],
-  ["Rear","אחורי / לטפח, לגדל","She was reared by her grandparents in a small countryside village."],
-  ["Reconcile","להתפייס","The couple attended therapy to reconcile their differences."],
-  ["Reform","שינוי, רפורמה","Healthcare reform has been a hot political topic for decades."],
-  ["Reinvigorate","לרענן, להמריץ מחדש","A cold shower can reinvigorate you on a hot summer day."],
-  ["Remainder","שארית","He donated the remainder of his salary to charity each month."],
-  ["Renovate","לחדש, לשפץ","The city plans to renovate the historic train station next year."],
-  ["Revoke","לבטל, לשלול","The government can revoke a passport for security reasons."],
-  ["Rudimentary","יסודי, בסיסי","The shelter provided only rudimentary protection from the storm."],
-  ["Sacrifice","להקריב, קורבן","She sacrificed her weekends to volunteer at the animal shelter."],
-  ["Sake","תועלת, עניין","He moved to a quieter town for the sake of his health."],
-  ["Screen","מסך / לסרוק / לסנן","All passengers are screened before boarding international flights."],
-  ["Seek","לבקש","Many young professionals seek mentorship from experienced leaders."],
-  ["Severe","חמור","The region experienced severe flooding after three days of rain."],
-  ["Shiny","נוצץ, בוהק","The freshly polished car looked shiny under the showroom lights."],
-  ["Side effect","תופעת לוואי","Weight gain is a known side effect of this medication."],
-  ["Sketch","שרטוט, סקיצה","She made a quick sketch of the dress she wanted to design."],
-  ["Skyrocket","להאמיר","Demand for electric cars has skyrocketed in recent years."],
-  ["Skyscraper","גורד שחקים","The iconic skyscraper dominates the city's skyline."],
-  ["Sorrow","עצב, צער","Music can express deep sorrow better than words ever could."],
-  ["Spectacular","מדהים","The Northern Lights put on a spectacular display last night."],
-  ["Spontaneously","ללא תכנון","The crowd spontaneously broke into applause after the performance."],
-  ["Steam","אד, לאדות","The old locomotive ran entirely on steam power."],
-  ["Steamship","אוניית קיטור","The steamship carried thousands of immigrants across the ocean."],
-  ["Stream","נחל, זרם, לזרום","Millions of people now stream their favorite shows online."],
-  ["Stricken","מוכה","The earthquake-stricken community received international aid."],
-  ["Stride","צעד, לצעוד","She made great strides in her recovery after the surgery."],
-  ["Strife","מאבק, עימות","Political strife has divided the nation for generations."],
-  ["Strike","הכה, התקיף / שביתה","The nurses went on strike over unsafe working conditions."],
-  ["Stumble","למעוד","He stumbled upon an old photograph hidden inside the book."],
-  ["Substitute","תחליף","There is no substitute for real-world experience in this field."],
-  ["Superfluous","מיותר, עודף","The editor cut several superfluous chapters from the manuscript."],
-  ["Tendency","נטייה","He has a tendency to procrastinate when facing difficult tasks."],
-  ["Terminate","לסיים, לחסל","The airline terminated the route due to low passenger numbers."],
-  ["Terrain","שטח","Hikers should wear proper boots for rocky terrain."],
-  ["Terrify","להפחיד, להבעית","The realistic horror movie terrified audiences across the country."],
-  ["Theme","נושא","The central theme of the exhibition is identity and belonging."],
-  ["Tolerate","לסבול","The manager will not tolerate any form of workplace harassment."],
-  ["Ultimate","מוחלט, סופי","The ultimate decision rests with the board of directors."],
-  ["Unbearable","בלתי נסבל","The silence in the empty house became unbearable at night."],
-  ["Uncountable","אינספור","Uncountable hours of research went into developing the vaccine."],
-  ["Undergo","לעבור, לחוות","The building will undergo major renovations starting next month."],
-  ["Vain","לשווא / שחצן","They searched in vain for survivors beneath the rubble."],
-  ["Vary","משתנה","Customs and traditions vary greatly from culture to culture."],
-  ["Venture","סיכון","Their joint venture into the restaurant business proved highly profitable."],
-  ["Verify","לוודא, לאמת","Banks use two-factor authentication to verify user identity."],
-  ["Versions","גרסאות","The app released three new versions within a single year."],
-  ["Vessel","כלי שיט","A large cargo vessel was stranded in the Suez Canal."],
-  ["Virtually","למעשה, בעצם","The pandemic made virtually every office switch to remote work."],
-  ["Visualize","לדמיין","Athletes often visualize their performance before a big competition."],
-  ["Weigh","לשקול","You should carefully weigh the pros and cons before deciding."],
-  ["Weight","משקל","He lost a significant amount of weight by changing his diet."],
-  ["Wickedly","ברשעות","She smiled wickedly before revealing the surprise to everyone."]
-];
-
-let showSentences = true;
-let selectMode = false;
-let markedSet = new Set();
-let removedSet = new Set(JSON.parse(localStorage.getItem('dict2_removed') || '[]'));
-let lastRemoved = null;
-
-function saveRemoved() {
-  localStorage.setItem('dict2_removed', JSON.stringify([...removedSet]));
-}
-
-const totalCount = words.length;
-document.getElementById('totalCount').textContent = totalCount;
-
-const list = document.getElementById('wordList');
-words.forEach((w, i) => {
-  const row = document.createElement('div');
-  row.className = 'row';
-  row.id = 'row-' + i;
-  row.innerHTML = `
-    <div class="row-top">
-      <span class="num">${i+1}</span>
-      <span class="check-box" id="chk-${i}" onclick="event.stopPropagation(); toggleMark(${i})"></span>
-      <span class="en">${w[0]}</span>
-      <span class="he-wrap"><span class="he" id="he-${i}" onclick="event.stopPropagation(); revealHe(${i})">${w[1]}</span></span>
-      <span class="speaker">🔊</span>
-    </div>
-    <div class="sentence">${w[2]}</div>
-  `;
-  row.onclick = () => {
-    if (selectMode) { toggleMark(i); }
-    else if (!isReading) { currentIndex = i; startReading(i); }
-  };
-  list.appendChild(row);
-});
-
-// Apply saved removals
-removedSet.forEach(idx => {
-  const row = document.getElementById('row-' + idx);
-  if (row) row.classList.add('removed');
-});
-updateRemainCount();
-renumber();
-updateRestoreBtn();
-
-function revealHe(i) {
-  document.getElementById('he-' + i).classList.toggle('revealed');
-}
-
-function toggleMode() {
-  selectMode = !selectMode;
-  const btn = document.getElementById('modeBtn');
-  if (selectMode) {
-    btn.classList.remove('off');
-    btn.textContent = '🗑 בחירה פעילה';
-    document.querySelectorAll('.check-box').forEach(c => c.classList.add('visible'));
-  } else {
-    btn.classList.add('off');
-    btn.textContent = '🗑 סמן';
-    document.querySelectorAll('.check-box').forEach(c => c.classList.remove('visible'));
-    markedSet.forEach(idx => {
-      document.getElementById('row-' + idx).classList.remove('marked');
-      document.getElementById('chk-' + idx).classList.remove('checked');
-      document.getElementById('chk-' + idx).textContent = '';
-    });
-    markedSet.clear();
-    document.getElementById('removeBtn').style.display = 'none';
-  }
-}
-
-function toggleMark(i) {
-  if (!selectMode) return;
-  const row = document.getElementById('row-' + i);
-  const chk = document.getElementById('chk-' + i);
-  if (markedSet.has(i)) {
-    markedSet.delete(i);
-    row.classList.remove('marked');
-    chk.classList.remove('checked');
-    chk.textContent = '';
-  } else {
-    markedSet.add(i);
-    row.classList.add('marked');
-    chk.classList.add('checked');
-    chk.textContent = '✓';
-  }
-  document.getElementById('removeBtn').style.display = markedSet.size > 0 ? 'inline-block' : 'none';
-  document.getElementById('removeBtn').textContent = `🗑 הסר ${markedSet.size}`;
-}
-
-function removeMarked() {
-  if (markedSet.size === 0) return;
-  lastRemoved = new Set(markedSet);
-  markedSet.forEach(idx => {
-    removedSet.add(idx);
-    const row = document.getElementById('row-' + idx);
-    row.classList.add('removed');
-    row.classList.remove('marked');
-    document.getElementById('chk-' + idx).classList.remove('checked');
-    document.getElementById('chk-' + idx).textContent = '';
-  });
-  markedSet.clear();
-  document.getElementById('removeBtn').style.display = 'none';
-  document.getElementById('undoBtn').style.display = 'inline-block';
-  document.getElementById('undoBtn').textContent = `↩ בטל (${lastRemoved.size})`;
-  updateRemainCount();
-  renumber();
-  saveRemoved();
-  updateRestoreBtn();
-}
-
-function undoRemove() {
-  if (!lastRemoved) return;
-  lastRemoved.forEach(idx => {
-    removedSet.delete(idx);
-    document.getElementById('row-' + idx).classList.remove('removed');
-  });
-  lastRemoved = null;
-  document.getElementById('undoBtn').style.display = 'none';
-  updateRemainCount();
-  renumber();
-  saveRemoved();
-  updateRestoreBtn();
-}
-
-function restoreAll() {
-  if (removedSet.size === 0) return;
-  removedSet.forEach(idx => {
-    document.getElementById('row-' + idx).classList.remove('removed');
-  });
-  removedSet.clear();
-  lastRemoved = null;
-  document.getElementById('undoBtn').style.display = 'none';
-  updateRemainCount();
-  renumber();
-  saveRemoved();
-  updateRestoreBtn();
-}
-
-function updateRestoreBtn() {
-  document.getElementById('restoreBtn').style.display = removedSet.size > 0 ? 'inline-block' : 'none';
-}
-
-function updateRemainCount() {
-  document.getElementById('remainCount').textContent = totalCount - removedSet.size;
-}
-
-function renumber() {
-  let n = 1;
-  words.forEach((w, i) => {
-    if (!removedSet.has(i)) {
-      document.getElementById('row-' + i).querySelector('.num').textContent = n;
-      n++;
-    }
-  });
-}
-
 const API_KEY = 'sk_6ed57332a2398ff9c7399701edb394ab2c6abb59d76ca67c';
+
 const voiceMap = {
   'Rachel':'21m00Tcm4TlvDq8ikWAM','Drew':'29vD33N1lfxGZTQFgRN',
-  'Clyde':'2EiwWnXFnvU5JabPnv8n','Paul':'5Q0t7uMcjvnagumLfvZi',
-  'Domi':'AZnzlk1XvdvUeBnXmlld','Dave':'CYw3kZ02Govck1ngkdoI',
-  'Fin':'D38z5RcWu1voky8WS1ja','Bella':'EXAVITQu4vr4xnSDxMaL',
+  'Bella':'EXAVITQu4vr4xnSDxMaL','Daniel':'onwK4e9ZLuTAKqWW03F9',
   'Emily':'LcfcDJNUP1GQjkzn1xUU','Charlie':'IKne5meyi320mud0r2Rr',
-  'Dorothy':'ThT5KcBeYPX3keUQqHPh','Charlotte':'XB0fDUnXU5powFXDhCwa',
-  'Matilda':'XrExE9yKIg1WjnnlVkGX','James':'ZQe5CZNOzWyzPSCn5a3c',
-  'Joseph':'Zlb1dXrM653N07WRdFW3','Daniel':'onwK4e9ZLuTAKqWW03F9',
-  'Lily':'pFZP5JQG7iQjIQuC4Bku','Grace':'oWAxZDx7w5VEj9dCyTzz',
-  'Serena':'pMsXgVXv3BLzUgSXRplE','Nicole':'piTKgcLEGmPE4e6mEKli'
+  'Dave':'CYw3kZ02Govck1ngkdoI','Domi':'AZnzlk1XvdvUeBnXmlld',
+  'Fin':'D38z5RcWu1voky8WS1ja','Dorothy':'ThT5KcBeYPX3keUQqHPh',
+  'James':'ZQe5CZNOzWyzPSCn5a3c','Lily':'pFZP5JQG7iQjIQuC4Bku',
+  'Matilda':'XrExE9yKIg1WjnnlVkGX','Nicole':'piTKgcLEGmPE4e6mEKli',
+  'Serena':'pMsXgVXv3BLzUgSXRplE'
 };
 
 let currentAudio = null;
+let isReading = false;
+let stopFlag = false;
+let currentIndex = 0;
 
 async function speakEL(text, onEnd) {
+  if (stopFlag) { onEnd(); return; }
   const voiceName = document.getElementById('voiceSelect').value;
   const speed = parseFloat(document.getElementById('speedSelect').value);
   const voiceId = voiceMap[voiceName] || voiceMap['Rachel'];
-
   try {
-    const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
+    const response = await fetch('https://api.elevenlabs.io/v1/text-to-speech/' + voiceId, {
       method: 'POST',
       headers: { 'xi-api-key': API_KEY, 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -697,55 +194,262 @@ async function speakEL(text, onEnd) {
         voice_settings: { stability: 0.5, similarity_boost: 0.75, speed: speed }
       })
     });
-
-    if (!response.ok) { console.error('ElevenLabs error:', response.status); onEnd(); return; }
-
+    if (!response.ok) { onEnd(); return; }
     const blob = await response.blob();
     const url = URL.createObjectURL(blob);
-
     if (currentAudio) { currentAudio.pause(); currentAudio = null; }
-
     currentAudio = new Audio(url);
     currentAudio.onended = () => { URL.revokeObjectURL(url); onEnd(); };
     currentAudio.onerror = () => { URL.revokeObjectURL(url); onEnd(); };
-    currentAudio.play();
+    await currentAudio.play();
   } catch(err) {
-    console.error('TTS error:', err);
+    console.error('EL error:', err);
     onEnd();
   }
 }
 
-function toggleSentences() {
-  showSentences = !showSentences;
-  const btn = document.getElementById('toggleBtn');
-  btn.className = 'pill pill-green' + (showSentences ? '' : ' off');
-  document.querySelectorAll('.sentence').forEach(s => { s.style.display = showSentences ? '' : 'none'; });
+const words = [
+  ["Bold","אמיץ, חצוף / מודגש","The explorer took a bold step into the unknown cave.","החוקר לקח צעד אמיץ אל תוך המערה הלא נודעת."],
+  ["Criteria","אמת מידה, אבן בחן","What are the main criteria for choosing a new employee?","מה אמות המידה העיקריות לבחירת עובד חדש?"],
+  ["Confrontation","עימות","A peaceful dialogue is better than a direct confrontation.","דיאלוג שליו עדיף על עימות ישיר."],
+  ["Comply","להסכים, לציית","Drivers must comply with traffic laws at all times.","נהגים חייבים לציית לחוקי התנועה בכל עת."],
+  ["Context","הקשר","Words can have different meanings depending on the context.","למילים יכולות להיות משמעויות שונות בהתאם להקשר."],
+  ["Worthy","ראוי","He proved himself to be worthy of the leadership role.","הוא הוכיח את עצמו כראוי לתפקיד המנהיגות."],
+  ["Serve","להגיש, לשרת / לרצות עונש","The waiter will serve your meal in a few minutes.","המלצר יגיש את הארוחה שלך בעוד כמה דקות."],
+  ["Reliance","הסתמכות","Too much reliance on others can weaken your independence.","הסתמכות יתר על אחרים יכולה להחליש את העצמאות שלך."],
+  ["Exploit","לנצל, להפיק תועלת","Some employers try to exploit their workers for more profit.","מעסיקים מסוימים מנסים לנצל את העובדים שלהם לרווח גדול יותר."],
+  ["Scatter","לפזר","The children scattered their toys all over the floor.","הילדים פיזרו את הצעצועים שלהם בכל רחבי הרצפה."],
+  ["At your disposal","לרשותך","My office and all its equipment are at your disposal.","המשרד שלי וכל הציוד שבו עומדים לרשותך."],
+  ["Unimaginable","בלתי נתפס","The beauty of the northern lights is simply unimaginable.","היופי של הזוהר הצפוני הוא פשוט בלתי נתפס."],
+  ["Sustain","לתמוך / להמשיך / סבל מ-","The athlete sustained a knee injury during the match.","הספורטאי סבל מפציעה בברך במהלך המשחק."],
+  ["Govern","למשול","It is not easy to govern such a large and diverse country.","לא קל למשול במדינה כה גדולה ומגוונת."],
+  ["Astound","להדהים","Her talent in mathematics astounded her teachers.","הכישרון שלה במתמטיקה הדהים את המורים שלה."],
+  ["Commerce","מסחר","Online commerce has changed the way people shop.","המסחר המקוון שינה את הדרך שבה אנשים קונים."],
+  ["Coat","מעיל / שכבה","You should wear a warm coat when the temperature drops.","כדאי ללבוש מעיל חם כשהטמפרטורה יורדת."],
+  ["Post","לפרסם / לשלוח בדואר / עמוד","She will post the photos from the trip tomorrow.","היא תפרסם את התמונות מהטיול מחר."],
+  ["Convoy","שיירה","The convoy of trucks delivered supplies to the remote village.","שיירת המשאיות סיפקה אספקה לכפר המרוחק."],
+  ["Ignorant","בור, חסר השכלה","He remained ignorant of the latest developments in his field.","הוא נשאר בור לגבי ההתפתחויות האחרונות בתחומו."],
+  ["Paramount","בעל חשיבות עליונה","Customer satisfaction is of paramount importance to our company.","שביעות רצון הלקוחות היא בעלת חשיבות עליונה עבור החברה שלנו."],
+  ["Priest","כומר","The young priest gave an inspiring sermon on Sunday.","הכומר הצעיר נתן דרשה מעוררת השראה ביום ראשון."],
+  ["Superb","מעולה","The chef prepared a superb dinner for the special guests.","השף הכין ארוחת ערב מעולה עבור האורחים המיוחדים."],
+  ["Stack","ערמה","He carried a huge stack of books to the library.","הוא נשא ערמה ענקית של ספרים אל הספרייה."],
+  ["Session","מושב","The therapy session helped her cope with her anxiety.","המושב הטיפולי עזר לה להתמודד עם החרדה שלה."],
+  ["Omission","השמטה, הזנחה","The omission of important details made the report useless.","השמטת פרטים חשובים הפכה את הדוח לחסר תועלת."],
+  ["Revenue","הכנסה, רווח","Tax revenue has decreased significantly this year.","ההכנסות ממיסים ירדו משמעותית השנה."],
+  ["Instruction","הוראה, הדרכה","Follow every instruction carefully to avoid mistakes.","עקבי אחר כל הוראה בקפידה כדי להימנע מטעויות."],
+  ["Underlies","מונח ביסוד","A strong work ethic underlies all her achievements.","אתיקה מקצועית חזקה מונחת ביסוד כל הישגיה."],
+  ["Chief","ראשי, בכיר, מנהיג","The chief engineer approved the final design.","המהנדס הראשי אישר את התכנון הסופי."],
+  ["Mild","מתון, עדין","Spring in this region is usually mild and sunny.","האביב באזור הזה הוא בדרך כלל מתון ושטוף שמש."],
+  ["Legislate","לחוקק","Lawmakers will legislate new rules to protect the environment.","המחוקקים יחוקקו כללים חדשים להגנה על הסביבה."],
+  ["Fall apart","להתפרק","Their friendship began to fall apart after the argument.","החברות שלהם החלה להתפרק אחרי הוויכוח."],
+  ["Avert","למנוע, להסיט","Careful planning helped avert a disaster at the event.","תכנון זהיר עזר למנוע אסון באירוע."],
+  ["Infected","הודבק","The wound became infected and needed medical attention.","הפצע הודבק והצריך טיפול רפואי."],
+  ["Radiation","קרינה","The dentist uses very low levels of radiation for X-rays.","רופא השיניים משתמש ברמות נמוכות מאוד של קרינה לצילומי רנטגן."],
+  ["Manuscript","כתב יד","She spent years writing her first novel manuscript.","היא בילתה שנים בכתיבת כתב היד של הרומן הראשון שלה."],
+  ["Ancestry","מוצא","My grandmother researched our ancestry all the way to Spain.","סבתא שלי חקרה את המוצא שלנו עד ספרד."],
+  ["Withhold","לעכב, לא לתת","The boss decided to withhold the bonus until next quarter.","הבוס החליט לעכב את הבונוס עד הרבעון הבא."],
+  ["Delight","תענוג","It is a real delight to see old friends after so many years.","זה תענוג אמיתי לראות חברים ותיקים אחרי כל כך הרבה שנים."],
+  ["Compromise","להתפשר","Successful marriages require both partners to compromise.","נישואין מוצלחים דורשים משני בני הזוג להתפשר."],
+  ["Vaccine","חיסון","The new vaccine proved effective in clinical trials.","החיסון החדש הוכח כיעיל בניסויים קליניים."],
+  ["Confront","להתעמת","She was brave enough to confront her fears directly.","היא הייתה אמיצה מספיק כדי להתעמת עם הפחדים שלה ישירות."],
+  ["Recreate","לשחזר, ליצור מחדש","The director tried to recreate the feeling of 1950s Paris.","הבמאי ניסה לשחזר את תחושת פריז של שנות ה-50."],
+  ["Undertake","לקחת על עצמך","The team will undertake a major research project next month.","הצוות ייקח על עצמו פרויקט מחקר גדול בחודש הבא."],
+  ["Skepticism","ספקנות","The scientist approached the new theory with healthy skepticism.","המדען ניגש לתאוריה החדשה בספקנות בריאה."],
+  ["Sheer","מוחלט / תלול / שקוף","The climber stood at the edge of a sheer cliff.","המטפס עמד בקצה של צוק תלול."],
+  ["Collapse","להתמוטט","Without support beams, the roof will eventually collapse.","ללא קורות תמיכה, הגג יתמוטט בסופו של דבר."],
+  ["Contract","חוזה / להתכווץ","Read every line of the contract before signing it.","קראי כל שורה בחוזה לפני שאת חותמת עליו."],
+  ["Forecast","תחזית","The economic forecast for next year looks promising.","התחזית הכלכלית לשנה הבאה נראית מבטיחה."],
+  ["Urgent","דחוף","This urgent email requires your immediate attention.","המייל הדחוף הזה דורש את תשומת הלב המיידית שלך."],
+  ["Overlaps","חופף","The schedule of the two classes overlaps on Tuesdays.","לוח הזמנים של שני השיעורים חופף בימי שלישי."],
+  ["Infection","זיהום","Washing hands regularly helps prevent infection.","שטיפת ידיים באופן קבוע עוזרת למנוע זיהום."],
+  ["Fine","קנס / עדין / מצוין","She received a fine for parking in the wrong zone.","היא קיבלה קנס על חניה באזור הלא נכון."],
+  ["Uprising","התקוממות, מרד","The historic uprising changed the nation forever.","ההתקוממות ההיסטורית שינתה את האומה לנצח."],
+  ["Retain","להחזיק, לשמור","This sponge can retain a lot of water.","הספוג הזה יכול להחזיק הרבה מים."],
+  ["Maritime","ימי","The museum displays many artifacts from maritime history.","המוזיאון מציג חפצים רבים מההיסטוריה הימית."],
+  ["Collaborate","לשתף פעולה","Artists from three countries will collaborate on this project.","אמנים משלוש מדינות ישתפו פעולה בפרויקט הזה."],
+  ["Analogy","אנלוגיה, הקבלה","The teacher used a clever analogy to explain gravity.","המורה השתמש באנלוגיה חכמה כדי להסביר את כוח הכבידה."],
+  ["Innocent","תמים / חף מפשע","The child gave an innocent smile to the stranger.","הילד נתן חיוך תמים לזר."],
+  ["Excel","להצטיין","Students who practice daily tend to excel in exams.","תלמידים שמתרגלים מדי יום נוטים להצטיין במבחנים."],
+  ["Dispose","להיפטר","Please dispose of electronic waste at the special center.","אנא היפטרו מפסולת אלקטרונית במרכז המיוחד."],
+  ["Forceful","חזק, תקיף","The lawyer gave a forceful argument in court.","עורך הדין נתן טיעון חזק בבית המשפט."],
+  ["Flight","טיסה / בריחה","The flight of the refugees from the war zone continued for weeks.","בריחת הפליטים מאזור המלחמה נמשכה שבועות."],
+  ["Vertical","מאונך","The painter added vertical lines to create a sense of height.","הצייר הוסיף קווים מאונכים כדי ליצור תחושת גובה."],
+  ["Qualify","להיות מוסמך","You need five years of experience to qualify for this position.","את צריכה חמש שנות ניסיון כדי להיות מוסמכת לתפקיד הזה."],
+  ["Presume","להניח","I presume the meeting has been canceled due to the storm.","אני מניחה שהפגישה בוטלה בגלל הסערה."],
+  ["Legislation","חקיקה","The new legislation aims to reduce plastic waste.","החקיקה החדשה נועדה לצמצם פסולת פלסטיק."],
+  ["Fundamental","בסיסי, פונדמנטלי","Reading and writing are fundamental skills for every child.","קריאה וכתיבה הם כישורים בסיסיים לכל ילד."],
+  ["Determined","נחוש, נחרץ","He was determined to finish the marathon no matter what.","הוא היה נחוש לסיים את המרתון לא משנה מה."],
+  ["Vigorously","במרץ","She shook the bottle vigorously before opening it.","היא ניערה את הבקבוק במרץ לפני שפתחה אותו."],
+  ["Resourceful","בעל תושייה","A resourceful manager can turn problems into opportunities.","מנהל בעל תושייה יכול להפוך בעיות להזדמנויות."],
+  ["Enact","לחוקק","The council will enact stricter noise regulations soon.","המועצה תחוקק תקנות רעש מחמירות יותר בקרוב."],
+  ["Wage","משכורת / לנהל מלחמה","The two nations waged a long and costly war.","שתי האומות ניהלו מלחמה ארוכה ויקרה."],
+  ["Consistent","עקבי","Her grades have been consistent throughout the semester.","הציונים שלה היו עקביים לאורך כל הסמסטר."],
+  ["Generated","יצר","The concert generated a lot of excitement in the city.","הקונצרט יצר הרבה התרגשות בעיר."],
+  ["Cast","להשליך / צוות שחקנים","The fisherman cast his line into the calm lake.","הדייג השליך את החכה שלו לאגם השקט."],
+  ["Gratify","לרצות","It gratified her to see her children happy and healthy.","זה ריצה אותה לראות את הילדים שלה שמחים ובריאים."],
+  ["Ancestor","אב קדמון","One of my ancestors arrived on the first ship to America.","אחד האבות הקדמונים שלי הגיע בספינה הראשונה לאמריקה."],
+  ["Populous","מאוכלס בצפיפות","Tokyo is one of the most populous cities on Earth.","טוקיו היא אחת הערים המאוכלסות בצפיפות בעולם."],
+  ["Dedicate","להקדיש","I would like to dedicate this book to my loving parents.","ברצוני להקדיש את הספר הזה להורי האוהבים."],
+  ["Nuclear","גרעיני","Some countries rely heavily on nuclear energy.","מדינות מסוימות נשענות רבות על אנרגיה גרעינית."],
+  ["Minority","מיעוט","Protecting minority rights is a core democratic value.","הגנה על זכויות המיעוט היא ערך דמוקרטי מרכזי."],
+  ["Retrieve","להשיב","I couldn't retrieve the deleted files from my computer.","לא הצלחתי להשיב את הקבצים שנמחקו מהמחשב שלי."],
+  ["Consult","להתייעץ","I want to consult with my family before making a decision.","אני רוצה להתייעץ עם המשפחה שלי לפני קבלת החלטה."],
+  ["Degree","דרגה / מעלה","Today's temperature dropped by ten degrees overnight.","הטמפרטורה של היום ירדה בעשר מעלות במהלך הלילה."],
+  ["Record","להקליט / שיא / לתעד","The singer will record her new album next week.","הזמרת תקליט את האלבום החדש שלה בשבוע הבא."],
+  ["Dialect","ניב","Each region of Italy has its own unique dialect.","לכל אזור באיטליה יש ניב ייחודי משלו."],
+  ["Degenerate","להתנוון","Without exercise, muscles will slowly degenerate.","ללא פעילות גופנית, השרירים יתנוונו לאט לאט."],
+  ["Planet","כוכב לכת","Scientists search for planets that might support life.","מדענים מחפשים כוכבי לכת שעשויים לתמוך בחיים."],
+  ["Column","עמוד / טור","Ancient Greek temples were supported by tall columns.","מקדשים יווניים עתיקים נתמכו על ידי עמודים גבוהים."],
+  ["Submit","להגיש / להיכנע","Please submit your application before the deadline.","אנא הגישי את הבקשה שלך לפני המועד האחרון."],
+  ["Fast","צום / מהיר","Many people fast for religious or health reasons.","אנשים רבים צמים מסיבות דתיות או בריאותיות."],
+  ["Obsolete","מיושן","Old computer programs become obsolete very quickly.","תוכנות מחשב ישנות הופכות למיושנות מהר מאוד."],
+  ["Governor","מושל","The new governor promised to improve public transportation.","המושל החדש הבטיח לשפר את התחבורה הציבורית."],
+  ["Stem","גזע","A rose stem is usually covered with sharp thorns.","גזע של ורד בדרך כלל מכוסה בקוצים חדים."],
+  ["Commit","לבצע / להתחייב","He is ready to commit to a long-term relationship.","הוא מוכן להתחייב לקשר ארוך טווח."],
+  ["Insurance","ביטוח","Travel insurance is recommended for international trips.","ביטוח נסיעות מומלץ לטיולים בינלאומיים."],
+  ["Superficial","שטחי","Their friendship seemed warm but was actually superficial.","החברות שלהם נראתה חמה אבל הייתה למעשה שטחית."],
+  ["Renown","ידוע, פרסום","The pianist is of international renown.","הפסנתרן ידוע ברמה הבינלאומית."],
+  ["Suppression","דיכוי","The suppression of peaceful protests shocked the world.","דיכוי המחאות השקטות הזעזע את העולם."],
+  ["Variable","משתנה","Stock prices are highly variable from day to day.","מחירי המניות משתנים מאוד מיום ליום."],
+  ["Modify","לשנות, להתאים","The engineer had to modify the design several times.","המהנדס היה צריך לשנות את העיצוב מספר פעמים."],
+  ["Illiterate","אנאלפבית","Many adults remain illiterate in developing countries.","מבוגרים רבים נשארים אנאלפביתים במדינות מתפתחות."],
+  ["Tormented","ייסר, ענה","Nightmares tormented him for weeks after the accident.","סיוטים ייסרו אותו במשך שבועות אחרי התאונה."],
+  ["Pass","לוותר / להעביר","I'll pass on dessert tonight, thank you.","אני אוותר על הקינוח הערב, תודה."],
+  ["Major","ראשי, עיקרי / מסלול לימודים","My sister decided to major in psychology next year.","אחותי החליטה ללמוד פסיכולוגיה כמסלול ראשי בשנה הבאה."],
+  ["Persecution","רדיפה","The community suffered persecution for centuries.","הקהילה סבלה מרדיפה במשך מאות שנים."],
+  ["Occurrence","התרחשות","Snow in this desert is a rare occurrence.","שלג במדבר הזה הוא התרחשות נדירה."],
+  ["Adverse","שלילי","The new policy had adverse effects on small businesses.","למדיניות החדשה היו השפעות שליליות על עסקים קטנים."],
+  ["Caste","מעמד חברתי","The caste you are born into can affect your opportunities.","המעמד החברתי שאליו נולדת יכול להשפיע על ההזדמנויות שלך."],
+  ["Lapse","מעידה / פרק זמן","A momentary lapse of judgment led to the mistake.","מעידה רגעית בשיקול הדעת הובילה לטעות."],
+  ["Modest","צנוע","They live in a modest house in a quiet neighborhood.","הם גרים בבית צנוע בשכונה שקטה."],
+  ["Various","מגוון","The shop offers various options for vegetarian customers.","החנות מציעה מגוון אפשרויות ללקוחות צמחוניים."],
+  ["Poll","סקר, הצבעה","A recent poll showed strong support for the new plan.","סקר אחרון הראה תמיכה חזקה בתוכנית החדשה."],
+  ["Manage","לנהל","She manages to balance her career and family beautifully.","היא מצליחה לנהל יפה את הקריירה והמשפחה שלה."],
+  ["Misconception","דעה מוטעית","It's a common misconception that sugar causes hyperactivity.","זו דעה מוטעית נפוצה שסוכר גורם להיפראקטיביות."],
+  ["Forfeit","לוותר, להפסיד","If you don't show up, you will forfeit your spot.","אם לא תגיעי, תפסידי את המקום שלך."],
+  ["Ward","מחלקה","The maternity ward was full of new parents and babies.","מחלקת היולדות הייתה מלאה בהורים טריים ותינוקות."],
+  ["Spectator","צופה, משקיף","Every spectator stood up to cheer for the winning team.","כל צופה קם לעודד את הקבוצה המנצחת."],
+  ["Lung","ריאה","Regular exercise strengthens your heart and lungs.","פעילות גופנית סדירה מחזקת את הלב והריאות שלך."],
+  ["Postage","דמי משלוח","Don't forget to check the postage before sending the package.","אל תשכחי לבדוק את דמי המשלוח לפני שליחת החבילה."],
+  ["Specify","לפרט","Please specify which type of service you need.","אנא פרטי איזה סוג שירות את צריכה."],
+  ["Staple","להדק / עיקרי","I need to staple these pages together before submitting.","אני צריכה להדק את הדפים האלה יחד לפני ההגשה."],
+  ["Restrain","לרסן","It's hard to restrain excited children at a birthday party.","קשה לרסן ילדים נרגשים במסיבת יום הולדת."],
+  ["Occupy","לתפוס, לאכלס / להעסיק","Two families currently occupy the large apartment.","שתי משפחות מאכלסות כרגע את הדירה הגדולה."],
+  ["Facilitate","לסייע, להקל","A good translator will facilitate clear communication.","מתרגם טוב יסייע לתקשורת ברורה."],
+  ["Nominated","מועמד","Three of her songs were nominated for an award this year.","שלושה מהשירים שלה היו מועמדים לפרס השנה."],
+  ["Benefactors","נדבנים, תורמים","The hospital was founded by a group of wealthy benefactors.","בית החולים נוסד על ידי קבוצת נדבנים עשירים."],
+  ["Industrious","חרוץ, שקדן","The industrious farmer worked from sunrise to sunset.","החקלאי החרוץ עבד מזריחה ועד שקיעה."],
+  ["Subdue","להכניע","The police managed to subdue the violent suspect.","המשטרה הצליחה להכניע את החשוד האלים."],
+  ["Impact","השפעה / התנגשות","Social media has a huge impact on young people today.","למדיה חברתית יש השפעה עצומה על אנשים צעירים היום."],
+  ["Recognition","הכרה","She finally received recognition for her years of research.","היא סוף סוף קיבלה הכרה על שנות המחקר שלה."],
+  ["Fundraiser","מגייס כספים","A talented fundraiser can make a big difference to a charity.","מגייס כספים מוכשר יכול לעשות הבדל גדול לעמותה."],
+  ["Constitute","להוות, לייסד","Three judges constitute the panel for this competition.","שלושה שופטים מהווים את הפאנל לתחרות הזו."],
+  ["Yield","להניב / לוותר","The new olive trees will yield fruit in about four years.","עצי הזית החדשים יניבו פרי בעוד כארבע שנים."],
+  ["Ignorance","בורות","Ignorance of current events can lead to poor decisions.","בורות לגבי אירועים אקטואליים יכולה להוביל להחלטות גרועות."]
+];
+
+let showSentences = true;
+let knownWords = {};
+try { knownWords = JSON.parse(localStorage.getItem('knownWords2') || '{}'); } catch(e) {}
+
+function saveKnown() {
+  try { localStorage.setItem('knownWords2', JSON.stringify(knownWords)); } catch(e) {}
 }
 
-let isReading = false;
-let currentIndex = 0;
-let stopFlag = false;
+const list = document.getElementById('wordList');
+words.forEach((w, i) => {
+  const row = document.createElement('div');
+  row.className = 'row' + (knownWords[w[0]] ? ' known' : '');
+  row.id = 'row-' + i;
+  row.innerHTML = `
+    <div class="row-top">
+      <span class="num">${i+1}</span>
+      <span class="en">${w[0]}</span>
+      <span class="he">${w[1]}</span>
+      <span class="speaker">🔊</span>
+      <button class="trash-btn">🗑</button>
+    </div>
+    <div class="sentence-box">
+      <div class="sentence">${w[2]}</div>
+      <div class="sentence-he">${w[3]}</div>
+    </div>
+  `;
+  row.querySelector('.row-top').onclick = (e) => {
+    if (e.target.classList.contains('he') || e.target.classList.contains('trash-btn')) return;
+    if (!isReading) { currentIndex = i; startReading(i); }
+  };
+  row.querySelector('.sentence').onclick = (e) => {
+    e.stopPropagation();
+    if (!isReading) { currentIndex = i; startReading(i); }
+  };
+  row.querySelector('.he').onclick = (e) => {
+    e.stopPropagation();
+    e.target.classList.toggle('revealed');
+  };
+  row.querySelector('.sentence-he').onclick = (e) => {
+    e.stopPropagation();
+    e.target.classList.toggle('revealed');
+  };
+  row.querySelector('.trash-btn').onclick = (e) => {
+    e.stopPropagation();
+    toggleKnown(i);
+  };
+  list.appendChild(row);
+});
 
-function getActiveIndices() {
-  const arr = [];
-  words.forEach((w, i) => { if (!removedSet.has(i)) arr.push(i); });
-  return arr;
+updateCounter();
+
+function toggleKnown(i) {
+  const key = words[i][0];
+  const row = document.getElementById('row-' + i);
+  if (knownWords[key]) { delete knownWords[key]; row.classList.remove('known'); }
+  else { knownWords[key] = true; row.classList.add('known'); }
+  saveKnown(); updateCounter();
+}
+
+function updateCounter() {
+  const knownCount = words.filter(w => knownWords[w[0]]).length;
+  document.getElementById('counter').innerHTML = `ללימוד: <b>${words.length - knownCount}</b> | יודעת: <b>${knownCount}</b>`;
+}
+
+function toggleShowKnown() {
+  const btn = document.getElementById('showKnownBtn');
+  document.body.classList.toggle('show-known');
+  btn.className = document.body.classList.contains('show-known') ? 'toggle-btn' : 'toggle-btn off';
+  btn.textContent = document.body.classList.contains('show-known') ? 'הסתר ידועות' : 'הצג ידועות';
+}
+
+function resetKnown() {
+  if (!confirm('לאפס את כל המילים הידועות?')) return;
+  knownWords = {}; saveKnown();
+  document.querySelectorAll('.row.known').forEach(r => r.classList.remove('known'));
+  updateCounter();
+}
+
+function toggleSentences() {
+  showSentences = !showSentences;
+  document.getElementById('toggleBtn').className = 'toggle-btn' + (showSentences ? '' : ' off');
+  document.querySelectorAll('.sentence-box').forEach(s => s.style.display = showSentences ? '' : 'none');
+}
+
+function findNextActive(from) {
+  for (let i = from; i < words.length; i++) {
+    if (!knownWords[words[i][0]]) return i;
+  }
+  return -1;
 }
 
 function continueReading() { startReading(currentIndex); }
-
 function restartReading() {
-  const active = getActiveIndices();
-  if (active.length === 0) return;
-  currentIndex = active[0];
-  startReading(currentIndex);
+  const next = findNextActive(0);
+  if (next === -1) { alert('סימנת את כל המילים!'); return; }
+  startReading(next);
 }
 
-function startReading(fromIndex = 0) {
-  if (selectMode) toggleMode();
-  stopFlag = false;
-  isReading = true;
-  currentIndex = fromIndex;
+function startReading(fromIndex) {
+  const next = findNextActive(fromIndex);
+  if (next === -1) { alert('סימנת את כל המילים!'); return; }
+  stopFlag = false; isReading = true; currentIndex = next;
   document.getElementById('btnPlay').style.display = 'none';
   document.getElementById('btnRestart').style.display = 'none';
   document.getElementById('btnStop').style.display = 'inline-block';
@@ -753,59 +457,54 @@ function startReading(fromIndex = 0) {
 }
 
 function stopReading() {
-  stopFlag = true;
-  isReading = false;
+  stopFlag = true; isReading = false;
   if (currentAudio) { currentAudio.pause(); currentAudio = null; }
   document.querySelectorAll('.row.active').forEach(r => r.classList.remove('active'));
   document.getElementById('btnPlay').style.display = 'inline-block';
   document.getElementById('btnStop').style.display = 'none';
-  const active = getActiveIndices();
-  const pos = active.indexOf(currentIndex);
-  document.getElementById('btnRestart').style.display = pos > 0 ? 'inline-block' : 'none';
-  document.getElementById('btnPlay').textContent = pos > 0 ? '▶ המשך' : '▶ הקרא הכל';
-  document.getElementById('statusText').textContent = pos > 0 ? `${words[currentIndex]?.[0] || ''}` : 'לחץ על מילה או הקרא הכל';
-  document.getElementById('progress').style.width = active.length > 0 ? Math.round((pos / active.length) * 100) + '%' : '0%';
+  document.getElementById('btnRestart').style.display = currentIndex > 0 ? 'inline-block' : 'none';
+  document.getElementById('btnPlay').textContent = currentIndex > 0 ? '▶ המשך' : '▶ הקרא הכל';
+  document.getElementById('statusText').textContent = currentIndex > 0 ? `עצרת: ${words[currentIndex]?.[0] || ''}` : 'לחץ על שורה או הקרא הכל';
+  document.getElementById('progress').style.width = Math.round((currentIndex / words.length) * 100) + '%';
 }
 
 function readNext() {
-  const active = getActiveIndices();
-  const pos = active.indexOf(currentIndex);
-
-  if (stopFlag || pos === -1 || pos >= active.length) {
-    if (!stopFlag && pos === -1) {
-      const nextActive = active.find(idx => idx >= currentIndex);
-      if (nextActive !== undefined) { currentIndex = nextActive; readNext(); return; }
-    }
-    if (!stopFlag) document.getElementById('statusText').textContent = '✓ סיימנו!';
-    stopReading();
-    return;
+  if (stopFlag) return;
+  const next = findNextActive(currentIndex);
+  if (next === -1) {
+    document.getElementById('statusText').textContent = '✓ סיימנו!';
+    stopReading(); return;
   }
+  currentIndex = next;
 
   document.querySelectorAll('.row.active').forEach(r => r.classList.remove('active'));
   const row = document.getElementById('row-' + currentIndex);
   row.classList.add('active');
   row.scrollIntoView({ behavior: 'smooth', block: 'center' });
-
-  document.getElementById('progress').style.width = Math.round((pos / active.length) * 100) + '%';
+  document.getElementById('progress').style.width = Math.round((currentIndex / words.length) * 100) + '%';
   document.getElementById('statusText').textContent = words[currentIndex][0];
 
-  const [en, he, sentence] = words[currentIndex];
+  const en = words[currentIndex][0];
+  const sentence = words[currentIndex][2];
   const savedIndex = currentIndex;
 
+  // קרא מילה → המתן → קרא משפט
   speakEL(en, () => {
     if (stopFlag) { currentIndex = savedIndex; return; }
-    if (showSentences) {
+    if (!showSentences) {
+      currentIndex++;
+      setTimeout(readNext, 400);
+      return;
+    }
+    // המתנה של שנייה לחשיבה
+    setTimeout(() => {
+      if (stopFlag) { currentIndex = savedIndex; return; }
       speakEL(sentence, () => {
         if (stopFlag) { currentIndex = savedIndex; return; }
-        const nextPos = active.indexOf(savedIndex) + 1;
-        if (nextPos < active.length) { currentIndex = active[nextPos]; } else { currentIndex = words.length; }
+        currentIndex++;
         setTimeout(readNext, 400);
       });
-    } else {
-      const nextPos = active.indexOf(savedIndex) + 1;
-      if (nextPos < active.length) { currentIndex = active[nextPos]; } else { currentIndex = words.length; }
-      setTimeout(readNext, 400);
-    }
+    }, 1000);
   });
 }
 
