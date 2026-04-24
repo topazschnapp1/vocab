@@ -140,7 +140,7 @@
 <div class="words" id="wordList"></div>
 
 <script>
-const API_KEY = 'sk_6ed57332a2398ff9c7399701edb394ab2c6abb59d76ca67c';
+const API_KEY = 'REPLACE_WITH_API_KEY';
 
 const voiceMap = {
   'Rachel':'21m00Tcm4TlvDq8ikWAM','Drew':'29vD33N1lfxGZTQFgRN',
