@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>מילים בעברית - לימוד</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #111;
+    color: #f0f0f0;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    padding-bottom: 100px;
+    direction: rtl;
+  }
+  .sticky-bar {
+    position: sticky; top: 0; background: #111;
+    z-index: 99; padding: 10px 14px;
+    border-bottom: 1px solid #2a2a2a;
+  }
+  .bar-row1, .bar-row2 {
+    display: flex; align-items: center;
+    gap: 8px; flex-wrap: wrap; margin-bottom: 8px;
+  }
+  .bar-row2 { margin-bottom: 0; }
+  .title { flex: 1; font-size: 0.85rem; color: #777; min-width: 80px; }
+  .stats {
+    font-size: 0.72rem; color: #6fda6f;
+    background: #1a3a1a; padding: 3px 8px;
+    border-radius: 10px; border: 1px solid #3a6a3a;
+  }
+  .btn {
+    padding: 9px 18px; border-radius: 24px; border: none;
+    font-size: 0.92rem; font-weight: 700; cursor: pointer;
+  }
+  .btn:active { opacity: 0.7; }
+  #btnPlay { background: #f0c040; color: #111; }
+  #btnStop { background: #ff4444; color: #fff; display: none; }
+  #btnRestart { background: #333; color: #aaa; border: 1px solid #444; font-size: 0.8rem; padding: 7px 12px; display: none; }
+  .toggle-btn {
+    background: #1a3a1a; color: #6fda6f;
+    border: 1px solid #3a6a3a; padding: 7px 12px;
+    border-radius: 20px; font-size: 0.78rem; cursor: pointer;
+  }
+  .toggle-btn.off { background: #222; color: #666; border-color: #333; }
+  .small-btn {
+    background: #222; color: #aaa;
+    border: 1px solid #333; padding: 6px 10px;
+    border-radius: 16px; font-size: 0.72rem; cursor: pointer;
+  }
+  .small-btn.danger { background: #3a1a1a; color: #ff8080; border-color: #6a3a3a; }
+  .voice-group { display: flex; align-items: center; gap: 5px; flex: 1; min-width: 140px; }
+  .voice-label { font-size: 0.72rem; color: #666; white-space: nowrap; }
+  select {
+    flex: 1; background: #1e1e1e; color: #ddd;
+    border: 1px solid #333; border-radius: 8px;
+    padding: 5px 8px; font-size: 0.75rem; outline: none; max-width: 180px;
+  }
+  .progress {
+    position: fixed; top: 0; left: 0; height: 3px;
+    background: #f0c040; width: 0; transition: width 0.3s; z-index: 999;
+  }
+  .words { padding: 6px 0; }
+  .row {
+    padding: 13px 16px; border-bottom: 1px solid #1e1e1e;
+    scroll-margin-top: 140px; transition: background 0.2s, opacity 0.3s;
+  }
+  .row.active { background: #1c1800; }
+  .row.hidden-known { display: none; }
+  .row-top { display: flex; align-items: center; gap: 10px; }
+  .num { font-size: 0.7rem; color: #444; min-width: 26px; }
+  .word {
+    font-size: 1.15rem; font-weight: 700; flex: 1;
+    color: #fff; cursor: pointer;
+  }
+  .row.active .word { color: #f0c040; }
+  .meaning {
+    font-size: 0.9rem; color: #bbb;
+    background: #1a2a3a; padding: 4px 10px; border-radius: 6px;
+    cursor: pointer; user-select: none; transition: all 0.2s;
+    min-width: 70px; text-align: center; position: relative;
+  }
+  .meaning.hidden {
+    color: transparent;
+    background: #2a2a2a;
+  }
+  .meaning.hidden::before {
+    content: "👁 הצג";
+    color: #555; font-size: 0.72rem;
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .row.active .meaning { color: #d8d8d8; }
+  .speaker { font-size: 1rem; opacity: 0; flex-shrink: 0; }
+  .row.active .speaker { opacity: 1; animation: pulse 0.7s ease-in-out infinite alternate; }
+  @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.3); } }
+  .know-btn {
+    background: #222; color: #555;
+    border: 1px solid #333; border-radius: 50%;
+    width: 30px; height: 30px; font-size: 0.95rem;
+    cursor: pointer; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center; padding: 0;
+  }
+  .know-btn:hover { background: #1a3a1a; color: #6fda6f; border-color: #3a6a3a; }
+  .know-btn:active { transform: scale(0.9); }
+  .sentence {
+    margin-top: 6px; padding-right: 36px;
+    font-size: 0.92rem; color: #888; line-height: 1.5; cursor: pointer;
+  }
+  .row.active .sentence { color: #c8c8c8; }
+  #knownSection {
+    margin-top: 20px; padding: 12px 14px;
+    border-top: 2px solid #2a2a2a;
+  }
+  #knownHeader {
+    font-size: 0.85rem; color: #6fda6f;
+    cursor: pointer; user-select: none; padding: 6px 0;
+  }
+  #knownList { display: none; margin-top: 8px; }
+  #knownList.show { display: block; }
+  .known-row {
+    padding: 8px 10px; display: flex; align-items: center;
+    gap: 10px; border-bottom: 1px solid #1e1e1e; opacity: 0.6;
+  }
+  .known-row .word { font-size: 0.95rem; font-weight: normal; color: #888; }
+  .known-row .meaning-text { font-size: 0.8rem; color: #666; }
+  .restore-btn {
+    background: #222; color: #aaa; border: 1px solid #444;
+    border-radius: 12px; padding: 4px 10px; font-size: 0.72rem; cursor: pointer;
+  }
+  .restore-btn:hover { background: #3a3a1a; color: #f0c040; }
+</style>
+</head>
+<body>
+
+<div class="progress" id="progress"></div>
+
+<div class="sticky-bar">
+  <div class="bar-row1">
+    <span class="title" id="statusText">לחצי על מילה או הקראה מלאה</span>
+    <span class="stats" id="statsText">0/0</span>
+    <button class="toggle-btn" id="toggleBtn" onclick="toggleSentences()">📝 משפטים</button>
+    <button class="btn" id="btnRestart" onclick="restartReading()">↩ התחלה</button>
+    <button class="btn" id="btnPlay" onclick="continueReading()">▶ הקראה</button>
+    <button class="btn" id="btnStop" onclick="stopReading()">■ עצור</button>
+  </div>
+  <div class="bar-row2">
+    <div class="voice-group">
+      <span class="voice-label">🎙 קול:</span>
+      <select id="voiceSelect">
+        <option value="Rachel">Rachel — נשי</option>
+        <option value="Bella">Bella — נשי</option>
+        <option value="Domi">Domi — נשי</option>
+        <option value="Emily">Emily — נשי</option>
+        <option value="Nicole">Nicole — נשי</option>
+        <option value="Serena">Serena — נשי</option>
+        <option value="Lily">Lily — נשי</option>
+        <option value="Dorothy">Dorothy — נשי</option>
+        <option value="Drew">Drew — גברי</option>
+        <option value="Daniel">Daniel — גברי</option>
+        <option value="Charlie">Charlie — גברי</option>
+        <option value="Dave">Dave — גברי</option>
+        <option value="Fin">Fin — גברי</option>
+        <option value="James">James — גברי</option>
+      </select>
+    </div>
+    <div class="voice-group">
+      <span class="voice-label">⚡ מהירות:</span>
+      <select id="speedSelect">
+        <option value="0.7">איטי</option>
+        <option value="0.85" selected>איטי-בינוני</option>
+        <option value="1.0">רגיל</option>
+        <option value="1.15">מהיר</option>
+      </select>
+    </div>
+    <button class="small-btn" onclick="showAllMeanings()">👁 הצג הכל</button>
+    <button class="small-btn" onclick="hideAllMeanings()">🙈 הסתר הכל</button>
+    <button class="small-btn danger" onclick="resetKnown()">🔄 אפס ידועות</button>
+  </div>
+</div>
+
+<div class="words" id="wordList"></div>
+
+<div id="knownSection">
+  <div id="knownHeader" onclick="toggleKnownList()">
+    ✓ מילים שאני יודעת (<span id="knownCount">0</span>) — לחצי להצגה
+  </div>
+  <div id="knownList"></div>
+</div>
+
+<script>
+const API_KEY = 'sk_6ed57332a2398ff9c7399701edb394ab2c6abb59d76ca67c';
+
+const voiceMap = {
+  'Rachel':'21m00Tcm4TlvDq8ikWAM','Drew':'29vD33N1lfxGZTQFgRN',
+  'Bella':'EXAVITQu4vr4xnSDxMaL','Daniel':'onwK4e9ZLuTAKqWW03F9',
+  'Emily':'LcfcDJNUP1GQjkzn1xUU','Charlie':'IKne5meyi320mud0r2Rr',
+  'Dave':'CYw3kZ02Govck1ngkdoI','Domi':'AZnzlk1XvdvUeBnXmlld',
+  'Fin':'D38z5RcWu1voky8WS1ja','Dorothy':'ThT5KcBeYPX3keUQqHPh',
+  'James':'ZQe5CZNOzWyzPSCn5a3c','Lily':'pFZP5JQG7iQjIQuC4Bku',
+  'Nicole':'piTKgcLEGmPE4e6mEKli','Serena':'pMsXgVXv3BLzUgSXRplE'
+};
+
+let currentAudio = null;
+
+function stopCurrentAudio() {
+  if (currentAudio) {
+    currentAudio.pause();
+    currentAudio.src = '';
+    currentAudio = null;
+  }
+}
+
+async function speakHE(text, onEnd) {
+  if (stopFlag) { onEnd(); return; }
+  const voiceId = voiceMap[document.getElementById('voiceSelect').value] || voiceMap['Rachel'];
+  const speed = parseFloat(document.getElementById('speedSelect').value);
+
+  try {
+    const res = await fetch('https://api.elevenlabs.io/v1/text-to-speech/' + voiceId, {
+      method: 'POST',
+      headers: { 'xi-api-key': API_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        text,
+        model_id: 'eleven_multilingual_v2',
+        voice_settings: { stability: 0.5, similarity_boost: 0.75, speed }
+      })
+    });
+    if (!res.ok || stopFlag) { onEnd(); return; }
+    const blob = await res.blob();
+    if (stopFlag) { onEnd(); return; }
+    const url = URL.createObjectURL(blob);
+    const audio = new Audio(url);
+    currentAudio = audio;
+    audio.onended = () => { URL.revokeObjectURL(url); if (currentAudio === audio) currentAudio = null; onEnd(); };
+    audio.onerror = () => { URL.revokeObjectURL(url); if (currentAudio === audio) currentAudio = null; onEnd(); };
+    audio.play();
+  } catch(e) {
+    currentAudio = null;
+    onEnd();
+  }
+}
+
+function prefetchNext(text) { /* no-op */ }
+
+// [מילה, פירוש, משפט לדוגמה]
+const words = [
+  ["אשכול", "קבוצה של ענבים", "הוא קטף אשכול ענבים גדול מהגפן."],
+  ["ירכתיים", "החלק האחורי של הסירה", "הדייג ישב בירכתיים והחזיק בהגה."],
+  ["נדן", "נרתיק לחרב", "הוא שלף את החרב מהנדן."],
+  ["האביס", "האכיל בצורה מוגזמת", "האיכר האביס את הבהמות לפני השחיטה."],
+  ["מכבש", "מכשיר שלוחץ ומשטח", "המכבש החליק את הכביש החדש."],
+  ["קלח", "יחידת תירס אחת", "אכלתי קלח תירס חם עם מלח."],
+  ["חרטום", "החלק הקדמי של האונייה", "הוא עמד בחרטום הספינה וצפה באופק."],
+  ["צי", "אוסף של אוניות", "הצי הישראלי מגן על החופים."],
+  ["מסיק", "קטיף זיתים", "בסתיו כל המשפחה יוצאת למסיק הזיתים."],
+  ["סתור", "לא מסודר, פרוע", "השיער שלה היה סתור אחרי השינה."],
+  ["להתקומם", "להביע כעס או מרמור", "התלמידים התקוממו נגד המורה החדש."],
+  ["תרעומת", "כעס, מרמור", "הוא הביע תרעומת על היחס שקיבל."],
+  ["לשלות", "להוציא מהמים", "הדייג שלה את הדג מהרשת."],
+  ["גיל", "שמחה", "גיל גדול מילא את ליבם."],
+  ["אקרן", "מסך", "הסרט הוקרן על אקרן ענק."],
+  ["התמתן", "נהיה מתון יותר", "הגשם התמתן בשעות אחר הצהריים."],
+  ["אדווה", "גל קטן", "אדווה קטנה התפשטה על פני המים."],
+  ["קסת", "בקבוק דיו", "הסופר טבל את הנוצה בקסת."],
+  ["גנז", "שם בארכיון", "הם גנזו את המסמכים הישנים."],
+  ["מצביא", "מפקד צבאי בכיר", "המצביא הוביל את הצבא לניצחון."],
+  ["קרון", "חלק מהרכבת", "ישבנו בקרון האחרון של הרכבת."],
+  ["קנה", "החלק הקדמי של הרובה", "הוא ניקה את קנה הרובה בקפידה."],
+  ["לטייח", "לשים טיח על הקיר", "הפועל טייח את הקיר החדש."],
+  ["להקיץ", "להתעורר", "הוא הקיץ משנתו עם שחר."],
+  ["מחויט", "תפור על ידי חייט", "הוא לבש חליפה מחויטת לחתונה."],
+  ["מפתן", "כניסה לחדר", "היא עמדה על מפתן הדלת."],
+  ["מרזב", "צינור להורדת מים מהגג", "המרזב נסתם אחרי הסערה."],
+  ["צחנה", "ריח רע מאוד", "הצחנה עלתה מהפח."],
+  ["התערטל", "הפשיט את עצמו", "הוא התערטל ונכנס לים."],
+  ["מנשר", "עלון, פלייר", "חילקו מנשרים ברחוב."],
+  ["מחרשה", "כלי לחריש באדמה", "החקלאי רתם את הפרה למחרשה."],
+  ["אמרה", "שולי הבגד", "היא תפרה את אמרת השמלה."],
+  ["גדה", "קצה הנחל", "ישבנו על גדת הנחל ואכלנו."],
+  ["להתיר", "לפתוח קשר", "היא ניסתה להתיר את הקשר בחוט."],
+  ["לטוות", "ליצור חוט", "סבתא ידעה לטוות צמר."],
+  ["לפרום", "לפרק תפר", "היא פרמה את התפר בחצאית."],
+  ["להקציע", "להחליק קרש", "הנגר הקציע את הקרש בקפידה."],
+  ["סייח", "סוס צעיר", "הסייח רץ אחרי אימו באחו."],
+  ["אצבעון", "כיסוי לאצבע בתפירה", "היא שמה אצבעון כדי לא להידקר."],
+  ["אספלנית", "פלסטר", "אמא שמה לי אספלנית על הפצע."],
+  ["החריש", "הנמיך את קולו", "הוא החריש ולא ענה."],
+  ["נבלה", "גופת חיה מתה", "הנשרים אכלו את הנבלה במדבר."],
+  ["לחלח", "להרטיב קלות", "הטל לחלח את העשב בבוקר."],
+  ["תמיהה", "פליאה, תהייה", "הבעה של תמיהה עלתה על פניו."],
+  ["להטליא", "לשים טלאי על בגד", "אמא הטליאה את המכנסיים הקרועים."],
+  ["כברה", "מסננת", "הקמח עבר דרך הכברה."],
+  ["להכביר", "להוסיף יותר מדי", "אין צורך להכביר במילים."],
+  ["אבניים", "כלי העבודה של הקדר", "הקדר ישב ליד האבניים ויצר כד."],
+  ["לסוטה", "אפודה בלי שרוולים", "הוא לבש לסוטה חומה מעל החולצה."],
+  ["בשגגה", "בטעות, בלי כוונה", "הוא פגע בה בשגגה."],
+  ["לכייל", "להפוך משהו למכוון ומדויק", "צריך לכייל את המאזניים לפני השימוש."],
+  ["חבץ", "הכין חמאה", "סבתא חבצה חמאה מחלב טרי."],
+  ["חרש", "יצר תלם באדמה", "האיכר חרש את השדה לפני הזריעה."],
+  ["ארה", "ליקט דבש", "הוא ארה דבש מהכוורת."],
+  ["נפל למשכב", "חלה, נשכב במיטה מחולי", "סבא נפל למשכב אחרי המחלה."],
+  ["נפלו פניו", "הצטער מאוד, התעצב", "כששמע את הבשורה, נפלו פניו."],
+  ["אמבר", "מחסן תבואה", "האמבר היה מלא חיטה אחרי הקציר."],
+  ["זגג", "מקצוע - מתקן זכוכיות", "הזגג החליף לנו את החלון השבור."],
+  ["תבואה", "יבול של דגנים", "השנה הייתה תבואה רבה בשדות."],
+  ["ארבה", "חגב שמשמיד יבולים", "מכת ארבה השמידה את השדות."],
+  ["לכייר", "ליצור כד", "היא למדה לכייר בבית הספר."],
+  ["זרנוק", "צינור גמיש", "הוא השקה את הגינה עם הזרנוק."],
+  ["מטפה", "מטף כיבוי אש", "בכל מטבח חייב להיות מטפה."],
+  ["קדרה", "סיר ברזל לבישול", "הקדרה רתחה על האש."],
+  ["מכלב", "אמצעי להצמדה", "הוא חיבר את הכבלים עם מכלב."],
+  ["מקטורן", "ז'קט רשמי", "הוא לבש מקטורן שחור לאירוע."],
+  ["נעלג", "לעג", "הילדים נעלגו לחבר החדש."],
+  ["מרט שערות", "תלש שערות", "הכאב היה כל כך גדול שמרט את שערות ראשו."],
+  ["נטע", "שתל עץ", "סבא נטע עץ רימון בחצר."],
+  ["דלה", "הוציא מהמים", "הדייג דלה דגים מהרשת."],
+  ["מרגמה", "כלי נשק יורה פצצות", "המרגמה ירתה לעבר המטרה."],
+  ["הפצצה", "הטלת פצצות", "ההפצצה נמשכה כל הלילה."],
+  ["קליע", "כדור ירי", "הקליע פגע בקיר."],
+  ["מסויד", "מכוסה בסיד", "הקיר היה מסויד בלבן."],
+  ["מגולוון", "מצופה מתכת נגד חלודה", "הגדר עשויה ממתכת מגולוונת."],
+  ["אטב", "מחבר, קליפס", "היא תלתה את הכביסה עם אטבים."],
+  ["מסירות נפש", "מסירות גדולה עד כדי סיכון חיים", "החיילים נלחמו במסירות נפש."],
+  ["בור סוד", "אדם עם זיכרון מצוין", "הוא בור סוד - זוכר כל פרט."],
+  ["גיס חמישי", "אויב מבפנים", "המרגל היה גיס חמישי."],
+  ["מקבת", "פטיש גדול", "הוא שבר את הסלע עם מקבת."],
+  ["מאכלת", "סכין גדולה", "הטבח השחיז את המאכלת."],
+  ["הטיל מורא", "גרם לפחד", "המפקד החדש הטיל מורא על החיילים."],
+  ["קומם", "גרם למישהו למרוד", "הנואם קומם את העם נגד המלך."],
+  ["דובב", "גרם למישהו לדבר", "היא הצליחה לדובב את הילד הביישן."],
+  ["עמיתים", "קולגות לעבודה", "הזמנתי את העמיתים שלי לארוחה."],
+  ["משלח יד", "עיסוק, מקצוע", "מה משלח ידך?"],
+  ["צפונים", "מוחבאים", "הסודות נשארו צפונים בליבו."],
+  ["מסתפק במועט", "לא רוצה מותרות", "הוא מסתפק במועט וחי חיים פשוטים."],
+  ["הפגזה", "ירי מרגמות", "ההפגזה על העיר נמשכה שעות."],
+  ["מסוקל", "שנוקו ממנו אבנים", "השביל המסוקל היה נוח להליכה."],
+  ["ענבל", "חלק הפעמון שמכה בו", "הענבל של הפעמון נשבר."],
+  ["קטר", "החלק המוביל של הרכבת", "הקטר משך עשרה קרונות."],
+  ["אורחה", "שיירה של אנשים או גמלים", "האורחה חצתה את המדבר."],
+  ["קולמוס", "עט של פעם", "הסופר כתב עם קולמוס ודיו."],
+  ["סמטה", "רחוב קטן וצר", "התגוררנו בסמטה קטנה בעיר העתיקה."],
+  ["גפה", "איבר - יד או רגל", "הוא פצע את אחת מגפיו."],
+  ["ביתן", "בית קטן", "היה לנו ביתן קטן בגינה."],
+  ["חריץ גבינה", "גבינה בצורת גלגל", "קנינו חריץ גבינה צהובה."],
+  ["חבר לעט", "שותף לכתיבה", "היה לי חבר לעט מאמריקה."],
+  ["להסות", "להשתיק", "האמא ניסתה להסות את התינוק."],
+  ["התפיל", "הוציא מלחים מהמים", "המפעל התפיל מי ים לשתייה."],
+  ["פלה", "הוציא כינים", "אמא פלתה את ראשו של הילד."],
+  ["בדה", "המציא שקרים", "הוא בדה סיפורים מליבו."],
+  ["משה", "הוציא מהמים", "בת פרעה משתה את משה מהיאור."],
+  ["רדה", "הוציא דבש מהכוורת", "הדבוראי רדה את הדבש."],
+  ["עמד על דם רעהו", "נמנע מלהציל", "אסור לעמוד על דם רעהו."],
+  ["עמד מנגד", "לא עשה כלום, צפה מהצד", "הוא עמד מנגד ולא עזר."],
+  ["חשף שיניים", "איים, הביע כעס", "הכלב חשף שיניים לעבר הזר."],
+  ["מילא פיו מים", "שתק לגמרי", "כששאלו אותו, מילא פיו מים."],
+  ["קדר", "מי שמכין כדים", "הקדר יצר כד יפה על האבניים."],
+  ["רקיק", "קרקר דק", "אכלנו רקיקים עם גבינה."],
+  ["זבן", "מוכר בחנות", "הזבן עזר לי לבחור חולצה."],
+  ["דלוח", "לא צלול, עכור", "המים בנחל היו דלוחים."],
+  ["עכור", "לא צלול", "הבריכה הייתה מלאה מים עכורים."],
+  ["מסק", "קטף זיתים", "הוא מסק את העץ במו ידיו."],
+  ["מטע", "שטח נטוע בעצים", "הלכנו לטייל במטע הזיתים."],
+  ["בצר", "קטף ענבים", "הוא בצר את הענבים בזהירות."],
+  ["גדד", "קטף תמרים", "סבי גדד את התמרים מהדקל."],
+  ["ארג", "הכין בד מחוטים", "סבתא ארגה שטיח יפה."],
+  ["נהיר", "ברור, מובן", "הכל נהיר לי עכשיו."],
+  ["משתעבד", "הופך לעבד", "הוא משתעבד לעבודה שלו."],
+  ["הזים", "הוכיח ששמועה לא נכונה", "היא הזימה את השמועות."],
+  ["הטמנה", "שימה באדמה", "הכסף נמצא בהטמנה בגינה."],
+  ["דורון", "מתנה", "הוא הביא לה דורון יפה."],
+  ["גזוזטרה", "מרפסת", "ישבנו על הגזוזטרה וצפינו בשקיעה."],
+  ["גנזך", "ארכיון", "הגנזך שומר על המסמכים הישנים."],
+  ["אומצה", "סטייק, חתיכת בשר", "אכלנו אומצה טעימה לארוחת ערב."],
+  ["צמית", "איכר משועבד לאדון", "הצמית עבד בשדות של האדון."],
+  ["משלחת", "קבוצת שליחים", "המשלחת יצאה לחו״ל לחתום על ההסכם."],
+  ["עלווה", "עלים של עץ", "העלווה הירוקה יצרה צל נעים."],
+  ["שמשייה", "מטרייה מהשמש", "פתחנו את השמשייה בחוף הים."],
+  ["מברקה", "משרד מברקים", "פעם שלחו הודעות מהמברקה."],
+  ["מברק", "הודעה דחופה", "הוא קיבל מברק מהמשפחה."],
+  ["מעבורת", "אונייה שמעבירה נוסעים ורכבים", "חצינו את הים במעבורת."],
+  ["אבה", "רצה, הסכים", "הוא לא אבה לשמוע."],
+  ["תמה", "התפלא", "תמה עליי שהגעתי מוקדם."],
+  ["הלצה", "בדיחה", "הוא סיפר הלצה מצחיקה."],
+  ["פדחת", "הראש, המצח", "היא טפחה לו על הפדחת."],
+  ["רחש", "קול חלש ושקט", "שמעתי רחש קל מבין השיחים."],
+  ["הרף עין", "זמן קצר מאוד", "זה קרה בהרף עין."],
+  ["דבלול", "קצה חוט פרום", "הדבלול התעקם מהסוודר."],
+  ["זיבורית", "אדמה גרועה", "קיבל חלקת זיבורית בירושה."],
+  ["משבר", "גל גדול וחזק", "המשבר שטף את הסירה."],
+  ["פתי", "תמים, מאמין לכל דבר", "הוא פתי - מאמין לכל שמועה."],
+  ["להערים", "להונות, לרמות", "הוא ניסה להערים על המוכר."],
+  ["הלעיט", "האכיל הרבה", "סבתא הלעיטה אותנו בעוגות."],
+  ["הפציר", "ביקש בתוקף", "הוא הפציר בה להישאר."],
+  ["ביתר", "חתך לחתיכות קטנות", "הטבח ביתר את הבשר."],
+  ["התרברבות", "השתחצנות", "ההתרברבות שלו הרגיזה את כולם."],
+  ["לחות", "קצת מים באוויר", "הלחות היום גבוהה מאוד."],
+  ["להתפיל", "להוציא מלחים ממים", "בישראל מתפילים מי ים לשתייה."],
+  ["תפל", "חסר טעם", "האוכל הזה תפל - אין בו מלח."],
+  ["לגלען", "להוציא את הגלעין", "גלענתי את הזיתים לפני הבישול."],
+  ["מנץ", "מוציא ניצנים", "העץ מנץ בתחילת האביב."],
+  ["מטולא", "בגד עם טלאים", "הוא לבש מעיל מטולא."],
+  ["מוחה", "מביע התנגדות", "הוא מוחה על ההחלטה."],
+  ["עוולות", "מעשי עוול, אי-צדק", "הוא נאבק נגד העוולות."],
+  ["רושף", "מתיז ניצוצות", "הרובה רושף אש."],
+  ["רצוץ", "שבור", "הקנה הרצוץ נפל על הרצפה."],
+  ["רהוט", "מדבר בשטף", "הוא רהוט באנגלית."],
+  ["רווי", "מלא עד תום", "הספוג רווי במים."],
+  ["רוכן", "מתכופף", "הוא רכן לקרוא את הכתוב."],
+  ["כמדומני", "אני סובר, אני חושב", "כמדומני שזה הפתרון הנכון."],
+  ["עיר", "חמור צעיר", "העיר רץ אחרי האתון."],
+  ["אתון", "חמורה, נקבה של חמור", "האתון סחבה את המשא."],
+  ["בכר", "גמל צעיר", "הבכר היה קטן מאימו הנאקה."],
+  ["נאקה", "גמלה, נקבת הגמל", "הנאקה הניקה את הבכר."],
+  ["כפר", "הכחיש באשמה", "הנאשם כפר בכל האשמות."],
+  ["הדהוד", "יצירת הד", "הדהוד הקולות נשמע במערה."],
+  ["בבואה", "השתקפות", "ראיתי את הבבואה שלי במים."],
+  ["אילן", "עץ", "אילן גדול צמח בחצר."],
+  ["אמיר", "צמרת העץ", "הציפור קיננה באמיר העץ."],
+  ["נבצר ממני", "נמנע ממני", "נבצר ממני להגיע לפגישה."],
+  ["להג", "דיבר בלי הפסקה", "הוא להג כל הערב בלי להקשיב."],
+  ["הקדיח", "שרף את האוכל", "שכחתי את הסיר והקדחתי את האוכל."],
+  ["חרך", "שרף קלות", "החום חרך את העלים."],
+  ["כילה", "השמיד, גמר", "האש כילתה את הכל."],
+  ["להסכית", "להקשיב היטב", "הסכיתו ושמעו!"],
+  ["מהמורה", "בור בדרך", "הרכב נתקע במהמורה."],
+  ["מכמורת", "רשת של דייגים", "הדייגים פרשו את המכמורת לים."],
+  ["נדם", "השתתק, עצר", "הקול נדם פתאום."],
+  ["כבה נרו", "נפטר, מת", "סבא כבה נרו בגיל תשעים."],
+  ["אל תירא", "אל תפחד", "אל תירא, הכל יהיה בסדר."],
+  ["אל נא באפך", "אל תכעס", "אל נא באפך עליי, הייתה זו טעות."],
+  ["אל מלא רחמים", "תפילה על המת", "אמרו אל מלא רחמים בהלוויה."],
+  ["אל תפן ליצר", "אל תיכנע ליצר הרע", "אל תפן ליצר - תחשוב לפני שאתה פועל."],
+  ["השרה", "שם במים להספגה", "היא השרתה את השעועית במים."],
+  ["רפרפת", "פודינג", "הילדים אכלו רפרפת שוקולד."],
+  ["זיע", "תנועה קלה", "לא הייתה זיע באוויר."],
+  ["הטמין", "שם באדמה", "הוא הטמין את הקופסה בגינה."],
+  ["לעקר", "למנוע יכולת הולדה", "עיקרו את הכלב."],
+  ["פורה", "מסוגל ללדת, פרה ורבה", "האדמה פורה במיוחד באזור הזה."],
+  ["לפת", "אחז חזק", "הוא לפת את ידה."],
+  ["בזק", "זרייה, פיזור", "בזק את המלח על הבשר."],
+  ["זרה מלח על הפצעים", "החמיר מצב קשה", "בדבריו הקשים זרה מלח על הפצעים."],
+  ["כילה (רשת)", "רשת נגד יתושים", "פרשנו כילה מעל המיטה."],
+  ["קת", "החלק האחורי של הרובה", "הוא נשען על קת הרובה."],
+  ["קופיץ", "סוג של סכין גדולה", "הקצב חתך את העצם עם קופיץ."],
+  ["סרן", "ציר שעליו מורכבים גלגלים", "הסרן של המכונית נשבר."],
+  ["מפורזל", "עטוף בברזל", "הדלת הייתה מפורזלת."],
+  ["כילי", "קמצן", "הוא כילי ולא מוציא שקל."],
+  ["סגפן", "מסתפק במועט, מתנזר", "הוא חי חיים סגפניים."],
+  ["ארך אפיים", "סבלני", "המורה ארך אפיים עם התלמידים."],
+  ["הרווה", "נתן למישהו לשתות", "היא הרוותה את הצמחים במים."],
+  ["נושע", "זכה להצלה", "החולה נושע ברגע האחרון."],
+  ["שם עינו בכוס", "שתה לשוכרה", "הוא שם עינו בכוס ולא תפקד."],
+  ["לא נס ליחו", "לא אבד כוחו", "למרות הגיל, לא נס ליחו."]
+];
+
+let showSentences = true;
+let isReading = false;
+let currentIndex = 0;
+let stopFlag = false;
+
+const STORAGE_KEY = 'hebrew_vocab_known_v2';
+let knownWords = [];
+try { knownWords = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); } catch(e) {}
+function saveKnown() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(knownWords)); } catch(e) {} }
+
+const list = document.getElementById('wordList');
+words.forEach((w, i) => {
+  const row = document.createElement('div');
+  row.className = 'row';
+  row.id = 'row-' + i;
+  row.dataset.word = w[0];
+  row.innerHTML = `
+    <div class="row-top">
+      <span class="num">${i+1}</span>
+      <span class="word">${w[0]}</span>
+      <span class="meaning hidden" data-text="${w[1].replace(/"/g, '&quot;')}">${w[1]}</span>
+      <span class="speaker">🔊</span>
+      <button class="know-btn" title="סמני שאני יודעת את המילה">✓</button>
+    </div>
+    <div class="sentence">${w[2]}</div>
+  `;
+  row.querySelector('.word').onclick = (e) => {
+    e.stopPropagation();
+    if (!isReading) { currentIndex = i; startReading(i); }
+  };
+  row.querySelector('.sentence').onclick = (e) => {
+    e.stopPropagation();
+    if (!isReading) { currentIndex = i; startReading(i); }
+  };
+  const meaningEl = row.querySelector('.meaning');
+  meaningEl.onclick = (e) => {
+    e.stopPropagation();
+    if (meaningEl.classList.contains('hidden')) {
+      meaningEl.classList.remove('hidden');
+      meaningEl.textContent = meaningEl.dataset.text;
+    } else {
+      meaningEl.classList.add('hidden');
+      meaningEl.textContent = '';
+    }
+  };
+  row.querySelector('.know-btn').onclick = (e) => {
+    e.stopPropagation();
+    markAsKnown(w[0]);
+  };
+  list.appendChild(row);
+});
+
+applyKnownFilter();
+
+function markAsKnown(word) {
+  if (!knownWords.includes(word)) { knownWords.push(word); saveKnown(); }
+  applyKnownFilter();
+}
+
+function restoreWord(word) {
+  knownWords = knownWords.filter(w => w !== word);
+  saveKnown(); applyKnownFilter();
+}
+
+function resetKnown() {
+  if (knownWords.length === 0) { alert('אין מילים מסומנות לאיפוס'); return; }
+  if (confirm(`האם לאפס את כל ${knownWords.length} המילים?`)) {
+    knownWords = []; saveKnown(); applyKnownFilter();
+  }
+}
+
+function applyKnownFilter() {
+  document.querySelectorAll('.row').forEach(row => {
+    row.classList.toggle('hidden-known', knownWords.includes(row.dataset.word));
+  });
+  const knownListEl = document.getElementById('knownList');
+  knownListEl.innerHTML = '';
+  knownWords.forEach(word => {
+    const wordData = words.find(w => w[0] === word);
+    if (!wordData) return;
+    const kr = document.createElement('div');
+    kr.className = 'known-row';
+    kr.innerHTML = `
+      <span class="word">${wordData[0]}</span>
+      <span class="meaning-text">${wordData[1]}</span>
+      <button class="restore-btn" onclick="restoreWord('${word.replace(/'/g, "\\'")}')">↩ החזר</button>
+    `;
+    knownListEl.appendChild(kr);
+  });
+  document.getElementById('knownCount').textContent = knownWords.length;
+  updateStats();
+}
+
+function toggleKnownList() {
+  document.getElementById('knownList').classList.toggle('show');
+}
+
+function updateStats() {
+  document.getElementById('statsText').textContent = `${words.length - knownWords.length}/${words.length} נותרו`;
+}
+
+function hideAllMeanings() {
+  document.querySelectorAll('.meaning').forEach(el => {
+    el.classList.add('hidden');
+    el.textContent = '';
+  });
+}
+
+function showAllMeanings() {
+  document.querySelectorAll('.meaning').forEach(el => {
+    el.classList.remove('hidden');
+    el.textContent = el.dataset.text;
+  });
+}
+
+function toggleSentences() {
+  showSentences = !showSentences;
+  document.getElementById('toggleBtn').className = 'toggle-btn' + (showSentences ? '' : ' off');
+  document.querySelectorAll('.sentence').forEach(s => s.style.display = showSentences ? '' : 'none');
+}
+
+function getActiveIndices() {
+  return words.map((w, i) => i).filter(i => !knownWords.includes(words[i][0]));
+}
+
+function continueReading() {
+  const active = getActiveIndices();
+  if (active.length === 0) { alert('כל המילים מסומנות כידועות! 🎉'); return; }
+  if (!active.includes(currentIndex)) currentIndex = active[0];
+  startReading(currentIndex);
+}
+
+function restartReading() {
+  const active = getActiveIndices();
+  if (active.length === 0) { alert('כל המילים מסומנות כידועות! 🎉'); return; }
+  currentIndex = active[0];
+  startReading(currentIndex);
+}
+
+function startReading(from) {
+  stopFlag = false; isReading = true; currentIndex = from;
+  document.getElementById('btnPlay').style.display = 'none';
+  document.getElementById('btnRestart').style.display = 'none';
+  document.getElementById('btnStop').style.display = 'inline-block';
+  readNext();
+}
+
+function stopReading() {
+  stopFlag = true; isReading = false;
+  stopCurrentAudio();
+  document.querySelectorAll('.row.active').forEach(r => r.classList.remove('active'));
+  document.getElementById('btnPlay').style.display = 'inline-block';
+  document.getElementById('btnStop').style.display = 'none';
+  const active = getActiveIndices();
+  const showRestart = active.length > 0 && currentIndex !== active[0];
+  document.getElementById('btnRestart').style.display = showRestart ? 'inline-block' : 'none';
+  document.getElementById('btnPlay').textContent = showRestart ? '▶ המשך' : '▶ הקראה';
+  const wordName = words[currentIndex]?.[0] || '';
+  document.getElementById('statusText').textContent = showRestart ? `עצרת במילה: ${wordName}` : 'לחצי על מילה או הקראה מלאה';
+  document.getElementById('progress').style.width = Math.round((currentIndex / words.length) * 100) + '%';
+}
+
+function getNextActiveIndex(from) {
+  for (let i = from + 1; i < words.length; i++) {
+    if (!knownWords.includes(words[i][0])) return i;
+  }
+  return -1;
+}
+
+function readNext() {
+  if (stopFlag) return;
+  if (knownWords.includes(words[currentIndex]?.[0])) {
+    const next = getNextActiveIndex(currentIndex);
+    if (next === -1) { document.getElementById('statusText').textContent = '✓ סיימנו!'; stopReading(); return; }
+    currentIndex = next;
+  }
+  if (currentIndex >= words.length) { stopReading(); return; }
+
+  document.querySelectorAll('.row.active').forEach(r => r.classList.remove('active'));
+  const row = document.getElementById('row-' + currentIndex);
+  row.classList.add('active');
+  row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+  const active = getActiveIndices();
+  const pos = active.indexOf(currentIndex);
+  document.getElementById('progress').style.width = (active.length > 0 ? Math.round((pos / active.length) * 100) : 0) + '%';
+  document.getElementById('statusText').textContent = words[currentIndex][0];
+
+  const thisIndex = currentIndex;
+  const [word, meaning, sentence] = words[thisIndex];
+
+  const goNext = () => {
+    if (stopFlag) { currentIndex = thisIndex; return; }
+    const next = getNextActiveIndex(thisIndex);
+    if (next === -1) {
+      document.getElementById('statusText').textContent = '✓ סיימנו!';
+      stopReading();
+      return;
+    }
+    currentIndex = next;
+    setTimeout(readNext, 700);
+  };
+
+  // סדר ההקראה: מילה -> הפסקה לחשיבה -> משפט (אם פעיל) -> פירוש
+  speakHE(word, () => {
+    if (stopFlag) { currentIndex = thisIndex; return; }
+    setTimeout(() => {
+      if (stopFlag) { currentIndex = thisIndex; return; }
+
+      const speakMeaningStep = () => {
+        if (stopFlag) { currentIndex = thisIndex; return; }
+        speakHE(meaning, goNext);
+      };
+
+      if (showSentences) {
+        speakHE(sentence, () => {
+          if (stopFlag) { currentIndex = thisIndex; return; }
+          setTimeout(speakMeaningStep, 400);
+        });
+      } else {
+        speakMeaningStep();
+      }
+    }, 1800);
+  });
+}
+
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden && isReading && currentAudio) { try { currentAudio.play(); } catch(e) {} }
+});
+</script>
+</body>
+</html>
