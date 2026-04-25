@@ -194,11 +194,18 @@ const voiceMap = {
   'Nicole':'piTKgcLEGmPE4e6mEKli','Serena':'pMsXgVXv3BLzUgSXRplE'
 };
 
-let currentAudio = null;
-let prefetchedAudio = null;
+let audioCtx = null;
+let currentSource = null;
+let prefetchedBuffer = null;
 let prefetchedText = null;
 
-async function fetchAudio(text) {
+function getAudioContext() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+
+async function fetchBuffer(text) {
   const voiceId = voiceMap[document.getElementById('voiceSelect').value] || voiceMap['Rachel'];
   const speed = parseFloat(document.getElementById('speedSelect').value);
   const res = await fetch('https://api.elevenlabs.io/v1/text-to-speech/' + voiceId, {
@@ -211,36 +218,48 @@ async function fetchAudio(text) {
     })
   });
   if (!res.ok) return null;
-  const url = URL.createObjectURL(await res.blob());
-  const audio = new Audio(url);
-  audio._url = url;
-  return audio;
+  const arrayBuffer = await res.arrayBuffer();
+  const ctx = getAudioContext();
+  return await ctx.decodeAudioData(arrayBuffer);
 }
 
 async function speakEL(text, onEnd) {
   if (stopFlag) { onEnd(); return; }
   try {
-    let audio;
-    if (prefetchedText === text && prefetchedAudio) {
-      audio = prefetchedAudio;
-      prefetchedAudio = null;
+    let buffer;
+    if (prefetchedText === text && prefetchedBuffer) {
+      buffer = prefetchedBuffer;
+      prefetchedBuffer = null;
       prefetchedText = null;
     } else {
-      audio = await fetchAudio(text);
+      buffer = await fetchBuffer(text);
     }
-    if (!audio) { onEnd(); return; }
-    if (currentAudio) { currentAudio.pause(); currentAudio = null; }
-    currentAudio = audio;
-    currentAudio.onended = () => { if (currentAudio) URL.revokeObjectURL(currentAudio._url); currentAudio = null; onEnd(); };
-    currentAudio.onerror = () => { if (currentAudio) URL.revokeObjectURL(currentAudio._url); currentAudio = null; onEnd(); };
-    currentAudio.play();
+    if (!buffer || stopFlag) { onEnd(); return; }
+
+    const ctx = getAudioContext();
+    if (currentSource) { try { currentSource.stop(); } catch(e) {} currentSource = null; }
+
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+    source.connect(ctx.destination);
+    source.onended = () => { currentSource = null; onEnd(); };
+    currentSource = source;
+    source.start(0);
   } catch(e) { onEnd(); }
 }
 
 function prefetchNext(text) {
-  if (!text) return;
+  if (!text || prefetchedText === text) return;
   prefetchedText = text;
-  fetchAudio(text).then(a => { if (a) prefetchedAudio = a; }).catch(() => {});
+  prefetchedBuffer = null;
+  fetchBuffer(text).then(b => {
+    if (b && prefetchedText === text) prefetchedBuffer = b;
+  }).catch(() => {});
+}
+
+// Fix stopReading to stop AudioContext source
+function stopCurrentAudio() {
+  if (currentSource) { try { currentSource.stop(); } catch(e) {} currentSource = null; }
 }
 
 const words = [
@@ -691,7 +710,7 @@ function startReading(from) {
 
 function stopReading() {
   stopFlag = true; isReading = false;
-  if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+  stopCurrentAudio();
   document.querySelectorAll('.row.active').forEach(r => r.classList.remove('active'));
   document.getElementById('btnPlay').style.display = 'inline-block';
   document.getElementById('btnStop').style.display = 'none';
@@ -754,7 +773,7 @@ function readNext() {
 }
 
 document.addEventListener('visibilitychange', () => {
-  if (!document.hidden && isReading && currentAudio) currentAudio.play();
+  if (!document.hidden && isReading && audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
 });
 </script>
 </body>
