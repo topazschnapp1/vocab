@@ -195,29 +195,52 @@ const voiceMap = {
 };
 
 let currentAudio = null;
+let prefetchedAudio = null;
+let prefetchedText = null;
+
+async function fetchAudio(text) {
+  const voiceId = voiceMap[document.getElementById('voiceSelect').value] || voiceMap['Rachel'];
+  const speed = parseFloat(document.getElementById('speedSelect').value);
+  const res = await fetch('https://api.elevenlabs.io/v1/text-to-speech/' + voiceId, {
+    method: 'POST',
+    headers: { 'xi-api-key': API_KEY, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      text,
+      model_id: 'eleven_monolingual_v1',
+      voice_settings: { stability: 0.5, similarity_boost: 0.75, speed }
+    })
+  });
+  if (!res.ok) return null;
+  const url = URL.createObjectURL(await res.blob());
+  const audio = new Audio(url);
+  audio._url = url;
+  return audio;
+}
 
 async function speakEL(text, onEnd) {
   if (stopFlag) { onEnd(); return; }
-  const voiceId = voiceMap[document.getElementById('voiceSelect').value] || voiceMap['Rachel'];
-  const speed = parseFloat(document.getElementById('speedSelect').value);
   try {
-    const res = await fetch('https://api.elevenlabs.io/v1/text-to-speech/' + voiceId, {
-      method: 'POST',
-      headers: { 'xi-api-key': API_KEY, 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        text,
-        model_id: 'eleven_monolingual_v1',
-        voice_settings: { stability: 0.5, similarity_boost: 0.75, speed }
-      })
-    });
-    if (!res.ok) { onEnd(); return; }
-    const url = URL.createObjectURL(await res.blob());
+    let audio;
+    if (prefetchedText === text && prefetchedAudio) {
+      audio = prefetchedAudio;
+      prefetchedAudio = null;
+      prefetchedText = null;
+    } else {
+      audio = await fetchAudio(text);
+    }
+    if (!audio) { onEnd(); return; }
     if (currentAudio) { currentAudio.pause(); currentAudio = null; }
-    currentAudio = new Audio(url);
-    currentAudio.onended = () => { URL.revokeObjectURL(url); onEnd(); };
-    currentAudio.onerror = () => { URL.revokeObjectURL(url); onEnd(); };
+    currentAudio = audio;
+    currentAudio.onended = () => { if (currentAudio) URL.revokeObjectURL(currentAudio._url); currentAudio = null; onEnd(); };
+    currentAudio.onerror = () => { if (currentAudio) URL.revokeObjectURL(currentAudio._url); currentAudio = null; onEnd(); };
     currentAudio.play();
   } catch(e) { onEnd(); }
+}
+
+function prefetchNext(text) {
+  if (!text) return;
+  prefetchedText = text;
+  fetchAudio(text).then(a => { if (a) prefetchedAudio = a; }).catch(() => {});
 }
 
 const words = [
@@ -709,6 +732,10 @@ function readNext() {
   const thisIndex = currentIndex;
   const en = words[thisIndex][0];
   const sentence = words[thisIndex][2];
+
+  // prefetch המילה הבאה מראש
+  const nextIdx = thisIndex + 1 < words.length ? thisIndex + 1 : -1;
+  if (nextIdx !== -1) prefetchNext(words[nextIdx][0]);
 
   const goNext = () => {
     if (stopFlag) { currentIndex = thisIndex; return; }
