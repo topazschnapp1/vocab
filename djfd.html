@@ -194,73 +194,51 @@ const voiceMap = {
   'Nicole':'piTKgcLEGmPE4e6mEKli','Serena':'pMsXgVXv3BLzUgSXRplE'
 };
 
-let audioCtx = null;
-let currentSource = null;
-let prefetchedBuffer = null;
-let prefetchedText = null;
+let currentAudio = null;
 
-function getAudioContext() {
-  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  if (audioCtx.state === 'suspended') audioCtx.resume();
-  return audioCtx;
-}
-
-async function fetchBuffer(text) {
-  const voiceId = voiceMap[document.getElementById('voiceSelect').value] || voiceMap['Rachel'];
-  const speed = parseFloat(document.getElementById('speedSelect').value);
-  const res = await fetch('https://api.elevenlabs.io/v1/text-to-speech/' + voiceId, {
-    method: 'POST',
-    headers: { 'xi-api-key': API_KEY, 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      text,
-      model_id: 'eleven_monolingual_v1',
-      voice_settings: { stability: 0.5, similarity_boost: 0.75, speed }
-    })
-  });
-  if (!res.ok) return null;
-  const arrayBuffer = await res.arrayBuffer();
-  const ctx = getAudioContext();
-  return await ctx.decodeAudioData(arrayBuffer);
+function stopCurrentAudio() {
+  if (currentAudio) {
+    currentAudio.pause();
+    currentAudio.src = '';
+    currentAudio = null;
+  }
 }
 
 async function speakEL(text, onEnd) {
   if (stopFlag) { onEnd(); return; }
+  const voiceId = voiceMap[document.getElementById('voiceSelect').value] || voiceMap['Rachel'];
+  const speed = parseFloat(document.getElementById('speedSelect').value);
+
+  // יצירת אלמנט אודיו מיד (בתוך event handler)
+  const audio = new Audio();
+  stopCurrentAudio();
+  currentAudio = audio;
+
   try {
-    let buffer;
-    if (prefetchedText === text && prefetchedBuffer) {
-      buffer = prefetchedBuffer;
-      prefetchedBuffer = null;
-      prefetchedText = null;
-    } else {
-      buffer = await fetchBuffer(text);
-    }
-    if (!buffer || stopFlag) { onEnd(); return; }
-
-    const ctx = getAudioContext();
-    if (currentSource) { try { currentSource.stop(); } catch(e) {} currentSource = null; }
-
-    const source = ctx.createBufferSource();
-    source.buffer = buffer;
-    source.connect(ctx.destination);
-    source.onended = () => { currentSource = null; onEnd(); };
-    currentSource = source;
-    source.start(0);
-  } catch(e) { onEnd(); }
+    const res = await fetch('https://api.elevenlabs.io/v1/text-to-speech/' + voiceId, {
+      method: 'POST',
+      headers: { 'xi-api-key': API_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        text,
+        model_id: 'eleven_monolingual_v1',
+        voice_settings: { stability: 0.5, similarity_boost: 0.75, speed }
+      })
+    });
+    if (!res.ok || stopFlag) { onEnd(); return; }
+    const blob = await res.blob();
+    if (stopFlag) { onEnd(); return; }
+    const url = URL.createObjectURL(blob);
+    audio.src = url;
+    audio.onended = () => { URL.revokeObjectURL(url); if (currentAudio === audio) currentAudio = null; onEnd(); };
+    audio.onerror = () => { URL.revokeObjectURL(url); if (currentAudio === audio) currentAudio = null; onEnd(); };
+    await audio.play();
+  } catch(e) {
+    if (currentAudio === audio) currentAudio = null;
+    onEnd();
+  }
 }
 
-function prefetchNext(text) {
-  if (!text || prefetchedText === text) return;
-  prefetchedText = text;
-  prefetchedBuffer = null;
-  fetchBuffer(text).then(b => {
-    if (b && prefetchedText === text) prefetchedBuffer = b;
-  }).catch(() => {});
-}
-
-// Fix stopReading to stop AudioContext source
-function stopCurrentAudio() {
-  if (currentSource) { try { currentSource.stop(); } catch(e) {} currentSource = null; }
-}
+function prefetchNext(text) { /* no-op on iOS */ }
 
 const words = [
   ["Superficial","שטחי","His knowledge of the subject was only superficial."],
@@ -773,7 +751,7 @@ function readNext() {
 }
 
 document.addEventListener('visibilitychange', () => {
-  if (!document.hidden && isReading && audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+  if (!document.hidden && isReading && currentAudio) { try { currentAudio.play(); } catch(e) {} }
 });
 </script>
 </body>
